@@ -44,7 +44,7 @@ SKIP_DIRS = {".git", "__pycache__", ".claude", "src"}
 def find_plugins(root: Path) -> list[Path]:
     return sorted(
         d for d in root.iterdir()
-        if d.is_dir() and d.name.startswith(PLUGIN_PREFIX)
+        if d.is_dir() and d.name.startswith(PLUGIN_PREFIX) and d.name not in SKIP_DIRS
     )
 
 
