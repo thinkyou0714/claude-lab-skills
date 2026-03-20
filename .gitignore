@@ -1,0 +1,38 @@
+# lab-skills .gitignore
+#
+# 方針: src/ 配下の正本ファイルのみを管理する。
+#       AI別生成物・キャッシュ・一時ファイルは管理しない。
+
+# --- AI 生成物 ---
+# src/ から生成されたファイルは gen/ ディレクトリへ出力する（将来設計）
+gen/
+dist/
+*.generated.md
+*.generated.json
+
+# --- ツール固有の出力（AI アダプター自動生成物）---
+# .claude/ や .cursor/ への自動生成コピーは追跡しない
+# （手動インストールのものは個別に判断）
+# .claude/commands/*.auto.md
+# .cursor/rules/*.auto.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- エディタ ---
+.vscode/settings.json
+*.swp
+*.swo
+
+# --- 一時ファイル ---
+tmp/
+*.tmp
+*.bak

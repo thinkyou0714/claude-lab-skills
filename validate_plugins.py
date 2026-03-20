@@ -38,7 +38,7 @@ REQUIRED_SECTIONS = [
 PLUGIN_PREFIX = "lab-"
 
 # スキップするディレクトリ名
-SKIP_DIRS = {".git", "__pycache__", ".claude"}
+SKIP_DIRS = {".git", "__pycache__", ".claude", "src"}
 
 
 def find_plugins(root: Path) -> list[Path]:
