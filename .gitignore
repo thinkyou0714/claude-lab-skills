@@ -28,6 +28,9 @@ venv/
 *.egg-info/
 build/
 
+# --- Node（markdownlint を npx 実行する際の作業物）---
+node_modules/
+
 # --- OS ---
 .DS_Store
 Thumbs.db

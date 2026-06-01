@@ -5,6 +5,7 @@ allowed-tools: Read,Grep
 ---
 
 この command が使う skills:
+
 - implementation-gate: ../../skills/implementation-gate/SKILL.md
 - change-impact-scan: ../../skills/change-impact-scan/SKILL.md
 - test-scope-definition: ../../skills/test-scope-definition/SKILL.md

@@ -1,6 +1,6 @@
 ---
 name: knowledge-capture
-description: "セッション内の判断・却下理由・前提変化・学びを、DECISIONS.md / ADR / CONTEXT.md に書き込める構造化草稿に変換する。Obsidian への直接書き込みや情報の正誤判断はスコープ外。"
+description: "セッション内の判断・却下理由・前提変化・学びを、DECISIONS.md / ADR / CONTEXT.md に書き込める構造化草稿に変換する。Obsidian への直接書き込みや情報の正誤判断はスコープ外。セッションの判断・学びを記録に残すときに使う。"
 ---
 
 ## Purpose

@@ -26,7 +26,7 @@ python src/lab-core/scripts/search.py "価格" --ext .md .json .csv
 
 ## 出力例
 
-```
+```text
 [検索結果] キーワード: '判断ゲート' — 4 ファイルにマッチ
 
   src/lab-core/data/glossary.md

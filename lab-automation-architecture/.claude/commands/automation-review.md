@@ -5,6 +5,7 @@ allowed-tools: Read,Grep
 ---
 
 この command が使う skills:
+
 - automation-feasibility: ../../skills/automation-feasibility/SKILL.md
 - manual-vs-automation-cost: ../../skills/manual-vs-automation-cost/SKILL.md
 - trigger-action-map: ../../skills/trigger-action-map/SKILL.md

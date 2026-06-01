@@ -1,6 +1,6 @@
 ---
 name: llm-portability-review
-description: "ドキュメント・プロンプト・スキル定義が、Claude 以外のLLM（GPT-4o / Gemini / Codex 等）でも意図通りに動作するかを評価する。Claude 固有の解釈・暗黙前提・スタイル依存を検出し、移植耐性を高める改善案を提示する。"
+description: "ドキュメント・プロンプト・スキル定義が、Claude 以外のLLM（GPT-4o / Gemini / Codex 等）でも意図通りに動作するかを評価する。Claude 固有の解釈・暗黙前提・スタイル依存を検出し、移植耐性を高める改善案を提示する。他LLMへ移植する前に使う。"
 ---
 
 ## Purpose

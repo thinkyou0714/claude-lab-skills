@@ -21,7 +21,7 @@
 
 ## インストール
 
-```
+```text
 /plugin marketplace add thinkyou0714/claude-lab-skills
 /plugin install lab-implementation-flow@lab-skills
 ```

@@ -5,6 +5,7 @@ allowed-tools: Read,Grep
 ---
 
 この command が使う skills:
+
 - stakeholder-translation: ../../skills/stakeholder-translation/SKILL.md
 - summary-structuring: ../../skills/summary-structuring/SKILL.md
 - onboarding-readability: ../../skills/onboarding-readability/SKILL.md

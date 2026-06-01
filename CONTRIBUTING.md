@@ -41,7 +41,7 @@
 
 ### 2. ディレクトリ作成
 
-```
+```text
 lab-skills/
 └─ <plugin-name>/
    └─ skills/
@@ -133,7 +133,7 @@ Command は Skill の薄いアダプタです。Command 自体に判断ロジッ
 
 ### 配置
 
-```
+```text
 lab-skills/<plugin-name>/.claude/commands/<command-name>.md
 ```
 

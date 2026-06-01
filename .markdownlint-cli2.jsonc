@@ -1,0 +1,22 @@
+{
+  // markdownlint-cli2 設定。日本語ドキュメント向けに調整。
+  //   実行: npx markdownlint-cli2 "**/*.md"
+  //   自動修正: npx markdownlint-cli2 --fix "**/*.md"
+  "config": {
+    "default": true,
+
+    // 無効化（日本語/本リポジトリの体裁と相性が悪い・些末なもの）
+    "MD013": false, // line-length: 日本語の長文は許容（ruff E501 と同方針）
+    "MD033": false, // inline-HTML: 将来の <details> 等を許容
+    "MD041": false, // first-line-heading: SKILL.md は frontmatter + H2 構成のため H1 を強制しない
+    "MD036": false, // emphasis-as-heading: 強調を見出し代わりに使う箇所を許容
+    "MD060": false, // table-column-style: テーブルのパイプ前後スペースは強制しない
+
+    // 有効（意味のある構造ルール。--fix で整形）
+    "MD040": true,  // コードフェンスは言語指定する
+    "MD032": true,  // リストの前後に空行
+    "MD022": true   // 見出しの前後に空行
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules", ".git", ".ruff_cache", ".pytest_cache"]
+}
