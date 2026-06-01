@@ -177,6 +177,9 @@ allowed-tools: Read,Grep
 - [ ] 人間の意思決定余地が残されている
 - [ ] Guardrails セクションが省略されていない
 - [ ] LAB Cross-Check セクションが省略されていない
+- [ ] 個人名・内部コードネーム・私的パスを含まない（GATE-3 / 非エンジニアにも通じる一般語にする）
+- [ ] 追加・変更した plugin の `README.md` を更新した
+- [ ] `python validate_plugins.py --strict` がグリーン（整合性 + リンク + マニフェスト）
 
 ---
 

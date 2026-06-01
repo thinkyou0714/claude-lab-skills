@@ -12,8 +12,10 @@ validate_plugins.py — lab-skills 整合性検証スクリプト
   7. description: が空でない / 長すぎない（<= 1024 文字）
   8. SKILL.md に必須セクションが存在する
   9. command ファイルが参照する SKILL.md が実際に存在する
- 10. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
- 11. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
+ 10. command の frontmatter に description: がある（allowed-tools: は警告）
+ 11. 各 plugin に README.md がある（警告）
+ 12. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
+ 13. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
 
 使い方:
   python validate_plugins.py [--root <lab-skills のパス>] [--verbose]
@@ -243,6 +245,17 @@ class Validator:
         if content is None:
             self.err(f"{self.rel(command_file)}: UTF-8 として読み込めない")
             return
+        rel = self.rel(command_file)
+
+        # command frontmatter 検査
+        fm = parse_frontmatter(content)
+        if not fm.get("description"):
+            self.err(f"{rel}: command frontmatter に description: がない")
+        else:
+            self.ok(f"{rel}: command description")
+        if "allowed-tools" not in fm:
+            self.warn(f"{rel}: command に allowed-tools: の宣言がない")
+
         for ref_path in extract_command_skill_refs(content):
             resolved = (command_file.parent / ref_path).resolve()
             if not resolved.exists():
@@ -258,6 +271,12 @@ class Validator:
         if not skills_dir.exists():
             self.err(f"{plugin.name}: skills/ ディレクトリが存在しない")
             return
+
+        # plugin README の存在確認（AP-D4: README なしでファイルを増やさない）
+        if (plugin / "README.md").exists():
+            self.ok(f"{plugin.name}: README.md")
+        else:
+            self.warn(f"{plugin.name}: README.md がない")
 
         skill_dirs = find_skill_dirs(plugin)
         if not skill_dirs:

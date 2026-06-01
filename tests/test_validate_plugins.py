@@ -228,3 +228,31 @@ def test_manifest_unlisted_plugin(tmp_path):
     _write_manifests(tmp_path, "lab-test", "lab-test", list_in_market=False)
     v = run_validator(tmp_path)
     assert any("未登録" in e for e in v.errors)
+
+
+# --- command frontmatter / plugin README -----------------------------------
+
+def _add_command(root: Path, plugin: str, name="cmd", frontmatter='description: "x"\nallowed-tools: Read'):
+    d = root / plugin / ".claude" / "commands"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{name}.md").write_text(f"---\n{frontmatter}\n---\n\n## 手順\n", encoding="utf-8")
+
+
+def test_command_requires_description(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _add_command(tmp_path, "lab-test", frontmatter="allowed-tools: Read")  # description なし
+    v = run_validator(tmp_path)
+    assert any("command frontmatter に description" in e for e in v.errors)
+
+
+def test_command_missing_allowed_tools_warns(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _add_command(tmp_path, "lab-test", frontmatter='description: "x"')  # allowed-tools なし
+    v = run_validator(tmp_path)
+    assert any("allowed-tools" in w for w in v.warnings)
+
+
+def test_plugin_missing_readme_warns(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")  # README を作らない
+    v = run_validator(tmp_path)
+    assert any("README.md がない" in w for w in v.warnings)
