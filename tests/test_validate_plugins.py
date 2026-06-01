@@ -256,3 +256,27 @@ def test_plugin_missing_readme_warns(tmp_path):
     make_plugin(tmp_path, plugin="lab-test")  # README を作らない
     v = run_validator(tmp_path)
     assert any("README.md がない" in w for w in v.warnings)
+
+
+# --- スキル相互参照 ---------------------------------------------------------
+
+def test_skill_ref_to_nonexistent_errors(tmp_path):
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `nonexistent-skill` skill — x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("参照スキル 'nonexistent-skill' が存在しない" in e for e in v.errors)
+
+
+def test_skill_ref_roadmap_marker_ok(tmp_path):
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `future-skill` skill（Roadmap: 未収録）— x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert not any("future-skill" in e for e in v.errors)
+
+
+def test_skill_ref_valid_ok(tmp_path):
+    foo = make_skill_md(name="foo", extra="\n## 参照\n- `bar` skill — x\n")
+    bar = make_skill_md(name="bar")
+    make_plugin(tmp_path, plugin="lab-test", skills={"foo": foo, "bar": bar})
+    v = run_validator(tmp_path)
+    assert not any("bar" in e and "存在しない" in e for e in v.errors)

@@ -15,7 +15,8 @@ validate_plugins.py — lab-skills 整合性検証スクリプト
  10. command の frontmatter に description: がある（allowed-tools: は警告）
  11. 各 plugin に README.md がある（警告）
  12. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
- 13. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
+ 13. SKILL.md の '`name` skill' 参照が実在する（未収録なら Roadmap 明記を要求）
+ 14. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
 
 使い方:
   python validate_plugins.py [--root <lab-skills のパス>] [--verbose]
@@ -69,6 +70,10 @@ MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 
+# スキル相互参照（`name` skill 形式）と「未収録」を許容する Roadmap マーカー
+SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]+)`\s*skill")
+ROADMAP_MARKERS = ("Roadmap", "未収録")
+
 
 def normalize_newlines(content: str) -> str:
     """CRLF / CR を LF に正規化する。"""
@@ -119,6 +124,17 @@ def extract_md_links(content: str) -> list[str]:
     content = FENCE_RE.sub("", content)
     content = INLINE_CODE_RE.sub("", content)
     return MD_LINK_RE.findall(content)
+
+
+def extract_skill_refs(content: str) -> list[tuple[str, str]]:
+    """'`name` skill' 形式のスキル参照を (name, 行テキスト) で返す（コードフェンス内は無視）。"""
+    content = normalize_newlines(content)
+    content = FENCE_RE.sub("", content)
+    out: list[tuple[str, str]] = []
+    for line in content.splitlines():
+        for m in SKILL_REF_RE.finditer(line):
+            out.append((m.group(1), line))
+    return out
 
 
 def find_plugins(root: Path) -> list[Path]:
@@ -320,6 +336,31 @@ class Validator:
                 else:
                     self.ok(f"{self.rel(md)}: リンク '{t}'")
 
+    def validate_skill_refs(self, plugins: list[Path]) -> None:
+        """SKILL.md 内の '`name` skill' 参照が実在するか検査する。
+
+        実在しない場合、同じ行に Roadmap/未収録 の明記があれば許容、なければ error。
+        （Round 1 の方針に従い、未収録スキルへの forward-reference は明示する）
+        """
+        print("\nスキル相互参照チェック: '`name` skill'", file=self.out)
+        valid = set(self.seen_names)
+        for plugin in plugins:
+            for skill_dir in find_skill_dirs(plugin):
+                md = skill_dir / "SKILL.md"
+                content = read_text(md)
+                if content is None:
+                    continue
+                for name, line in extract_skill_refs(content):
+                    if name in valid:
+                        self.ok(f"{self.rel(md)}: skill ref '{name}'")
+                    elif any(mk in line for mk in ROADMAP_MARKERS):
+                        self.ok(f"{self.rel(md)}: skill ref '{name}'（Roadmap 明記）")
+                    else:
+                        self.err(
+                            f"{self.rel(md)}: 参照スキル '{name}' が存在しない"
+                            "（実在しないなら Roadmap/未収録 を明記すること）"
+                        )
+
     def _load_json(self, path: Path):
         try:
             return json.loads(path.read_text(encoding="utf-8"))
@@ -393,6 +434,7 @@ class Validator:
         if self.check_links_enabled:
             self.validate_links()
 
+        self.validate_skill_refs(plugins)
         self.validate_manifests(plugins)
 
         # 結果サマリー
