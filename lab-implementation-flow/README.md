@@ -1,5 +1,7 @@
 # lab-implementation-flow
 
+> English: [README.en.md](./README.en.md)
+
 実装着手ゲート・影響範囲スキャン・施工AIへの handoff を担うプラグイン。
 「実装に入ってよい状態か」を点検し、通過後に実行可能な指示書へ変換する。
 

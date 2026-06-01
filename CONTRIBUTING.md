@@ -1,5 +1,7 @@
 # CONTRIBUTING — lab-skills への追加・変更ルール
 
+> English: [CONTRIBUTING.en.md](./CONTRIBUTING.en.md)
+
 ## 基本姿勢
 
 - 「答えを出す」ではなく「判断材料を揃える」Skill を作る
@@ -41,12 +43,19 @@
 
 ### 2. ディレクトリ作成
 
+スキャフォルダで雛形を生成する（既存は上書きしない。設計方針は ADR-006 参照）。
+
 ```text
-lab-skills/
-└─ <plugin-name>/
-   └─ skills/
-      └─ <skill-name>/
-         └─ SKILL.md
+python src/lab-core/scripts/new_skill.py <plugin-name> <skill-name>
+```
+
+生成される構造:
+
+```text
+<plugin-name>/
+└─ skills/
+   └─ <skill-name>/
+      └─ SKILL.md
 ```
 
 ### 3. SKILL.md 作成

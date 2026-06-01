@@ -19,7 +19,8 @@
 ### Added（追加）
 
 - **Roadmap プラグインを本実装**: `lab-strategy-design`（7スキル, `/strategy` `/strategy-review`）と `lab-data-auth-ops`（6スキル, `/data-review`）を追加。収録は 4→6 プラグイン / 27→40 スキルに拡大。既存の forward-reference（`scope-design` / `auth-boundary-check` / `rollback-readiness`）を実体化し、Roadmap 明記を解除。
-- **国際化（i18n）**: 英語版 README（`README.en.md`）を追加し、日本語版と相互リンク。
+- **国際化（i18n）**: 英語版 README（ルート + 全6プラグインの `README.en.md`）と `CONTRIBUTING.en.md` を追加し、日本語版と相互リンク。
+- **スキャフォルダ `src/lab-core/scripts/new_skill.py`**: テンプレートから新規スキルの雛形を生成（既存は上書きしない）。SKILL.md は手作りを正とし機械的な全文再生成はしない方針を **ADR-006** に記録。「SoT → SKILL」ループを安全な形（雛形生成 + 双方向リンク整合の検証）で実現。
 - **`src/` 領域別 Source of Truth 層を実体化**: `src/lab-strategy/`（`strategy-principles.md` / `positioning-reference.md`）と `src/lab-data-auth/`（`data-auth-principles.md` / `pii-classification.md`）を追加。スキルと双方向に参照リンクし、「SoT → SKILL」の依存を明示。
 - 欠落していた正本ドキュメントを作成: `docs/CONTEXT.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `src/lab-core/data/glossary.md`。
 - 各プラグインの `README.md`（×4、スキル表 + Command + インストール手順）。`validate_plugins.py` で plugin README の存在と command frontmatter（`description` / `allowed-tools`）も検査。
