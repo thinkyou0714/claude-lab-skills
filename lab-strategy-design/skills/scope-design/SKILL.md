@@ -91,4 +91,5 @@ description: "事業・施策の戦略的スコープ（どの市場・顧客・
 - `boundary-check` skill — 実装・施策レベルのスコープ境界
 - `value-proposition-check` skill — 集中領域の提供価値を検証する
 - [antipatterns.md](../../../src/lab-core/rules/antipatterns.md) — AP-D3（初手で過剰に作り込む）
+- [strategy-principles.md](../../../src/lab-strategy/rules/strategy-principles.md) — 戦略設計の正本（SoT）
 - [docs/DECISIONS.md](../../../docs/DECISIONS.md) — スコープに関する過去決定

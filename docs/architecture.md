@@ -50,9 +50,9 @@ AIツール向けは「薄いアダプター」として生成する。
 | ディレクトリ | 役割 | 現状 |
 |-------------|------|------|
 | `src/lab-core/` | 全スキル共通の基盤（用語・ゲート・アンチパターン・コスト比較）| 実装済み |
-| `src/lab-strategy/` | 事業設計（顧客課題・提供価値・競争回避・価格）| 未収録（Roadmap）|
+| `src/lab-strategy/` | 事業設計（顧客課題・提供価値・競争回避・価格）| 実装済み |
 | `src/lab-system-design/` | n8n前提の自動化設計 | 予約済み（未実装）|
-| `src/lab-data-auth/` | Supabase前提の認証・データ設計 | 予約済み（未実装）|
+| `src/lab-data-auth/` | 認証・データ設計（権限境界・PII・監査）| 実装済み |
 | `src/lab-implementation-ops/` | 実装運用規律（PR・ロールバック・AI指示）| 予約済み（未実装）|
 | `src/lab-frontend-design/` | LP・会員画面・CTA設計 | 予約済み（未実装）|
 

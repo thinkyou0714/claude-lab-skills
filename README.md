@@ -3,6 +3,8 @@
 [![CI](https://github.com/thinkyou0714/claude-lab-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/thinkyou0714/claude-lab-skills/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+> English version: [README.en.md](./README.en.md)
+
 ## 概要
 
 `lab-skills` は THINK YOU LAB の「思考OS」を構成する再利用可能な判断資産のリポジトリです。
@@ -45,8 +47,8 @@ Plugin      ─── 領域別パッケージ（例: lab-thinking-core）
 
 ### Roadmap（将来）
 
-プラグイン6種は収録済み。今後は `src/` の領域別 Source of Truth 層（`src/lab-strategy/` 等）と、
-SoT → SKILL.md 再生成ループの整備を予定している（現状の SoT は `src/lab-core/` のみ）。
+プラグイン6種・主要ドメインの Source of Truth（`src/lab-core` / `lab-strategy` / `lab-data-auth`）は収録済み。
+今後は残りドメインの SoT（`src/lab-system-design` 等）と、SoT → SKILL.md 再生成ループの整備を予定している。
 
 ---
 
@@ -130,9 +132,9 @@ src/
     rules/cost-comparison.md
     templates/skill-template.md
     scripts/search.py  ← src/ 内の知識をキーワード検索する最小スクリプト
-  lab-strategy/       ← 事業設計の知識（Roadmap: 本リポジトリ未収録）
+  lab-strategy/       ← 事業設計の正本（rules/strategy-principles.md, data/）
   lab-system-design/  ← n8n前提の自動化設計（将来実装）
-  lab-data-auth/      ← Supabase前提の認証・データ設計（将来実装）
+  lab-data-auth/      ← 認証・データ設計の正本（rules/data-auth-principles.md, data/）
   lab-implementation-ops/  ← 実装運用規律（将来実装）
   lab-frontend-design/     ← LP・会員画面・CTA設計（将来実装）
 ```

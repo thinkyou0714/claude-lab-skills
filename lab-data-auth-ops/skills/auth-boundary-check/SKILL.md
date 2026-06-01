@@ -92,3 +92,4 @@ description: "認証・認可の境界（誰が・何に・どの条件でアク
 - `data-model-review` skill — 行レベル権限を支えるデータ設計
 - `access-control-matrix` skill — 権限マトリクスの体系的な設計
 - `audit-log-design` skill — 認証・権限イベントの監査ログ
+- [data-auth-principles.md](../../../src/lab-data-auth/rules/data-auth-principles.md) — データ・認証設計の正本（SoT）

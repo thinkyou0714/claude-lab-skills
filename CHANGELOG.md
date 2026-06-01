@@ -19,6 +19,8 @@
 ### Added（追加）
 
 - **Roadmap プラグインを本実装**: `lab-strategy-design`（7スキル, `/strategy` `/strategy-review`）と `lab-data-auth-ops`（6スキル, `/data-review`）を追加。収録は 4→6 プラグイン / 27→40 スキルに拡大。既存の forward-reference（`scope-design` / `auth-boundary-check` / `rollback-readiness`）を実体化し、Roadmap 明記を解除。
+- **国際化（i18n）**: 英語版 README（`README.en.md`）を追加し、日本語版と相互リンク。
+- **`src/` 領域別 Source of Truth 層を実体化**: `src/lab-strategy/`（`strategy-principles.md` / `positioning-reference.md`）と `src/lab-data-auth/`（`data-auth-principles.md` / `pii-classification.md`）を追加。スキルと双方向に参照リンクし、「SoT → SKILL」の依存を明示。
 - 欠落していた正本ドキュメントを作成: `docs/CONTEXT.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `src/lab-core/data/glossary.md`。
 - 各プラグインの `README.md`（×4、スキル表 + Command + インストール手順）。`validate_plugins.py` で plugin README の存在と command frontmatter（`description` / `allowed-tools`）も検査。
 - CI に pip キャッシュを追加。CONTRIBUTING の品質ゲートに「個人名・内部コードネームを含めない（GATE-3）」「plugin README 更新」を追加。
