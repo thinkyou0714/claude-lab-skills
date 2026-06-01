@@ -1,0 +1,5 @@
+[codespell]
+# 英単語のタイポ検出（日本語は対象外）。設定は CI / pre-commit / ローカルで共有。
+skip = ./.git,./node_modules,./.ruff_cache,./.pytest_cache,*.json
+# 固有名詞・意図的表記などの誤検知を避ける語をカンマ区切りで追記する
+ignore-words-list = thinkyou

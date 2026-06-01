@@ -1,6 +1,6 @@
 ---
 name: onboarding-readability
-description: "ドキュメント・README・設計記録が、初めて読む人（人間またはAI）にとって理解可能かを評価する。前提知識・用語定義・構造・導線の欠落を検出し、改善点を提示する。"
+description: "ドキュメント・README・設計記録が、初めて読む人（人間またはAI）にとって理解可能かを評価する。前提知識・用語定義・構造・導線の欠落を検出し、改善点を提示する。ドキュメントを公開・共有する前に使う。"
 ---
 
 ## Purpose
@@ -104,4 +104,4 @@ description: "ドキュメント・README・設計記録が、初めて読む人
 - `reusable-doc-structure` skill — ドキュメントの再利用可能な構造設計
 - `llm-portability-review` skill — 他LLMへの移植耐性チェック
 - `summary-structuring` skill — 長文ドキュメントの構造化要約
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — プロジェクト文脈ドキュメントの参照例
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — プロジェクト文脈ドキュメントの参照例

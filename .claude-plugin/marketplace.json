@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "lab-skills",
+  "owner": {
+    "name": "thinkyou0714"
+  },
+  "description": "THINK YOU LAB 思考OS — 意思決定品質を高める判断資産（Skill / Command）のマーケットプレイス。",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "lab-thinking-core",
+      "source": "./lab-thinking-core",
+      "displayName": "Lab Thinking Core",
+      "description": "論点整理・前提検証・意思決定支援（/think）"
+    },
+    {
+      "name": "lab-automation-architecture",
+      "source": "./lab-automation-architecture",
+      "displayName": "Lab Automation Architecture",
+      "description": "自動化可否判断・フロー設計・障害設計（/automation-review）"
+    },
+    {
+      "name": "lab-implementation-flow",
+      "source": "./lab-implementation-flow",
+      "displayName": "Lab Implementation Flow",
+      "description": "実装ゲート・影響範囲・施工AIへの handoff（/impl-gate）"
+    },
+    {
+      "name": "lab-communication-translation",
+      "source": "./lab-communication-translation",
+      "displayName": "Lab Communication Translation",
+      "description": "非エンジニア翻訳・ドキュメント再利用性・知識記録変換（/translate）"
+    }
+  ]
+}

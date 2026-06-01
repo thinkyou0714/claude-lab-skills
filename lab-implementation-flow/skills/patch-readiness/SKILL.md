@@ -1,6 +1,6 @@
 ---
 name: patch-readiness
-description: "既存システムへのパッチ・ホットフィックス・緊急修正を安全に適用できる状態かを確認する。テスト・バックアップ・ロールバック手段が揃っているかをチェックする。"
+description: "既存システムへのパッチ・ホットフィックス・緊急修正を安全に適用できる状態かを確認する。テスト・バックアップ・ロールバック手段が揃っているかをチェックする。パッチ・ホットフィックスを適用する前に使う。"
 ---
 
 ## Purpose
@@ -107,4 +107,4 @@ description: "既存システムへのパッチ・ホットフィックス・緊
 - `rollback-plan` skill — ロールバック方針の詳細設計
 - `test-scope-definition` skill — テストスコープの定義
 - `implementation-gate` skill — 実装着手前のゲートチェック
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — 技術スタック・デプロイ環境
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — 技術スタック・デプロイ環境

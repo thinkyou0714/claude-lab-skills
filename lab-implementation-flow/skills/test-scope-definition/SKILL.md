@@ -1,6 +1,6 @@
 ---
 name: test-scope-definition
-description: "実装・変更に対して何をどこまでテストすべきかを定義する。テスト種別・対象・優先度・合否基準を整理し、テスト不足による手戻りを防ぐ。"
+description: "実装・変更に対して何をどこまでテストすべきかを定義する。テスト種別・対象・優先度・合否基準を整理し、テスト不足による手戻りを防ぐ。テスト計画を立てるときに使う。"
 ---
 
 ## Purpose
@@ -104,4 +104,4 @@ description: "実装・変更に対して何をどこまでテストすべきか
 - `implementation-gate` skill — テストスコープ確認を含む実装着手前チェック
 - `change-impact-scan` skill — テスト対象の影響範囲洗い出し
 - `patch-readiness` skill — パッチ適用前のテスト準備確認
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — 技術スタック・テストツール
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — 技術スタック・テストツール

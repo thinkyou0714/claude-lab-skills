@@ -5,6 +5,7 @@ allowed-tools: Read,Grep
 ---
 
 この command が使う skills:
+
 - issue-framing: ../../skills/issue-framing/SKILL.md
 - assumption-audit: ../../skills/assumption-audit/SKILL.md
 - boundary-check: ../../skills/boundary-check/SKILL.md

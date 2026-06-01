@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # GitHub Actions の更新を週次で確認
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"

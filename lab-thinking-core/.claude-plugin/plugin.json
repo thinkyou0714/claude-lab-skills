@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lab-thinking-core",
+  "displayName": "Lab Thinking Core",
+  "version": "1.0.0",
+  "description": "論点整理・前提検証・意思決定支援。issue-framing から decision-materials まで判断材料を揃える Skill 群。",
+  "author": {
+    "name": "thinkyou0714"
+  },
+  "homepage": "https://github.com/thinkyou0714/claude-lab-skills",
+  "repository": "https://github.com/thinkyou0714/claude-lab-skills",
+  "license": "MIT",
+  "keywords": ["thinking", "decision-making", "issue-framing", "review"],
+  "skills": "./skills/",
+  "commands": "./.claude/commands/"
+}

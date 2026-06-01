@@ -23,7 +23,7 @@ description: "設計・実装・施策のスコープの境界を確認し、や
 - **対象**: スコープを確認する設計・機能・施策
 - **目的**: これを実現する本来の目的
 - **現時点の想定スコープ**: 何をやると思っているか（箇条書きで）
-- **フェーズ**: 現在どのフェーズか（P0 / P1 等）
+- **フェーズ**: 現在どのフェーズか（優先度・段階）
 - **関係する他システム**: 隣接するシステム・機能・チーム
 
 ## Output Contract
@@ -40,7 +40,7 @@ description: "設計・実装・施策のスコープの境界を確認し、や
 
 ### 境界マップ フォーマット
 
-```
+```text
 ## スコープ境界マップ
 
 ### やること（In Scope）
@@ -110,6 +110,6 @@ description: "設計・実装・施策のスコープの境界を確認し、や
 
 - `issue-framing` — スコープ確認前の論点整理
 - `assumption-audit` — スコープの前提を洗い出す
-- `scope-design` skill（lab-strategy-design）— 戦略的なスコープ設計
+- `scope-design` skill（Roadmap: lab-strategy-design、本リポジトリ未収録）— 戦略的なスコープ設計
 - `implementation-gate` skill（lab-implementation-flow）— 実装前の最終スコープ確認
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — フェーズ分けの過去決定
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — フェーズ分けの過去決定

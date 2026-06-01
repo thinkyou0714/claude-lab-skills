@@ -1,0 +1,290 @@
+"""validate_plugins.py のユニットテスト。"""
+
+import io
+import json
+from pathlib import Path
+
+import pytest
+
+import validate_plugins as vp
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+# --- ヘルパー ---------------------------------------------------------------
+
+def make_skill_md(name="foo", description="責務の説明。使う場面を含む。", sections=None, extra=""):
+    if sections is None:
+        sections = vp.REQUIRED_SECTIONS
+    fm = f'---\nname: {name}\ndescription: "{description}"\n---\n\n'
+    body = "\n".join(f"## {s}\n\n本文\n" for s in sections)
+    return fm + body + extra
+
+
+def make_plugin(root: Path, plugin="lab-test", skills=None):
+    if skills is None:
+        skills = {"foo": make_skill_md("foo")}
+    for skill, content in skills.items():
+        d = root / plugin / "skills" / skill
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "SKILL.md").write_text(content, encoding="utf-8")
+
+
+def run_validator(root: Path, **kw) -> vp.Validator:
+    v = vp.Validator(root=root.resolve(), out=io.StringIO(), **kw)
+    v.run()
+    return v
+
+
+# --- parse_frontmatter ------------------------------------------------------
+
+def test_parse_frontmatter_basic():
+    fm = vp.parse_frontmatter('---\nname: foo\ndescription: "bar"\n---\nbody')
+    assert fm == {"name": "foo", "description": "bar"}
+
+
+def test_parse_frontmatter_crlf():
+    fm = vp.parse_frontmatter('---\r\nname: foo\r\ndescription: "bar"\r\n---\r\nbody')
+    assert fm["name"] == "foo"
+    assert fm["description"] == "bar"
+
+
+def test_parse_frontmatter_single_quotes_and_comments():
+    fm = vp.parse_frontmatter("---\nname: foo\n# comment\ndescription: 'bar'\n---\n")
+    assert fm["name"] == "foo"
+    assert fm["description"] == "bar"
+    assert "# comment" not in fm
+
+
+def test_parse_frontmatter_missing():
+    assert vp.parse_frontmatter("no frontmatter here") == {}
+
+
+# --- extract_* --------------------------------------------------------------
+
+def test_extract_sections():
+    secs = vp.extract_sections("## A\ntext\n## B\n### C\n")
+    assert secs == {"A", "B"}
+
+
+def test_extract_command_skill_refs():
+    text = "- foo: ../../skills/foo/SKILL.md\n- bar: ../../skills/bar/SKILL.md\n"
+    assert vp.extract_command_skill_refs(text) == [
+        "../../skills/foo/SKILL.md",
+        "../../skills/bar/SKILL.md",
+    ]
+
+
+def test_extract_md_links_ignores_fences_and_inline_code():
+    # extract_md_links はリンク抽出のみ担当（http 等の除外は validate_links 側）。
+    # コードフェンス内・インラインコード内のリンクは抽出されないこと。
+    text = (
+        "[a](./a.md) and [ext](https://example.com)\n"
+        "```\n[infence](./should-be-ignored.md)\n```\n"
+        "`[inline](./also-ignored.md)`\n"
+    )
+    links = vp.extract_md_links(text)
+    assert "./a.md" in links
+    assert "https://example.com" in links  # 抽出はされる（除外は後段）
+    assert "./should-be-ignored.md" not in links
+    assert "./also-ignored.md" not in links
+
+
+# --- skill name 正規表現 ----------------------------------------------------
+
+@pytest.mark.parametrize("name", ["foo", "foo-bar", "a1-b2-c3", "x"])
+def test_skill_name_valid(name):
+    assert vp.SKILL_NAME_RE.match(name)
+
+
+@pytest.mark.parametrize("name", ["Foo", "foo_bar", "foo--bar", "-foo", "foo-", "foo bar", ""])
+def test_skill_name_invalid(name):
+    assert not vp.SKILL_NAME_RE.match(name)
+
+
+# --- Validator: 正常系 ------------------------------------------------------
+
+def test_valid_plugin_passes(tmp_path):
+    make_plugin(tmp_path)
+    v = run_validator(tmp_path)
+    assert not v.errors
+    assert v.ok_count > 0
+
+
+# --- Validator: 異常系 ------------------------------------------------------
+
+def test_missing_skill_md(tmp_path):
+    (tmp_path / "lab-test" / "skills" / "empty").mkdir(parents=True)
+    v = run_validator(tmp_path)
+    assert any("SKILL.md が存在しない" in e for e in v.errors)
+
+
+def test_missing_frontmatter_name(tmp_path):
+    md = "---\ndescription: \"x\"\n---\n" + "\n".join(f"## {s}\n\nx\n" for s in vp.REQUIRED_SECTIONS)
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("name: がない" in e for e in v.errors)
+
+
+def test_name_dir_mismatch(tmp_path):
+    make_plugin(tmp_path, skills={"foo": make_skill_md(name="bar")})
+    v = run_validator(tmp_path)
+    assert any("不一致" in e for e in v.errors)
+
+
+def test_bad_name_format(tmp_path):
+    # ディレクトリ名も不正にして「不一致」ではなく「形式」エラーを出させる
+    md = make_skill_md(name="Foo_Bar")
+    d = tmp_path / "lab-test" / "skills" / "Foo_Bar"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(md, encoding="utf-8")
+    v = run_validator(tmp_path)
+    assert any("kebab-case" in e for e in v.errors)
+
+
+def test_duplicate_name(tmp_path):
+    # 2 つの plugin に同じ skill 名 -> 重複検出
+    make_plugin(tmp_path, plugin="lab-a", skills={"dup": make_skill_md("dup")})
+    make_plugin(tmp_path, plugin="lab-b", skills={"dup": make_skill_md("dup")})
+    v = run_validator(tmp_path)
+    assert any("重複" in e for e in v.errors)
+
+
+def test_missing_section(tmp_path):
+    md = make_skill_md(sections=["Purpose", "Use When"])  # 大半が欠落
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("必須セクション" in e for e in v.errors)
+
+
+def test_empty_description(tmp_path):
+    md = make_skill_md(description="")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("description: が空" in e for e in v.errors)
+
+
+def test_broken_internal_link(tmp_path):
+    md = make_skill_md(extra="\n[broken](./does-not-exist.md)\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("が存在しない" in e for e in v.errors)
+
+
+def test_outside_repo_link(tmp_path):
+    md = make_skill_md(extra="\n[outside](../../../../../../etc/passwd)\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("リポジトリ外" in e for e in v.errors)
+
+
+def test_no_plugins(tmp_path):
+    v = vp.Validator(root=tmp_path.resolve(), out=io.StringIO())
+    assert v.run() is False  # plugin が無ければ False
+
+
+# --- 統合: 実リポジトリがグリーンであること --------------------------------
+
+def test_real_repo_passes():
+    """実リポジトリは error 0・warning 0 でなければならない（回帰ガード）。"""
+    v = vp.Validator(root=REPO_ROOT, out=io.StringIO())
+    success = v.run()
+    assert success, f"errors={v.errors}\nwarnings={v.warnings}"
+    assert not v.warnings, f"warnings={v.warnings}"
+
+
+# --- マニフェスト検査 -------------------------------------------------------
+
+def _write_manifests(root: Path, plugin: str, plugin_name: str, list_in_market: bool = True):
+    market_dir = root / ".claude-plugin"
+    market_dir.mkdir(parents=True, exist_ok=True)
+    plugins = [{"name": plugin, "source": f"./{plugin}"}] if list_in_market else []
+    (market_dir / "marketplace.json").write_text(
+        json.dumps({"name": "m", "owner": {"name": "o"}, "plugins": plugins}),
+        encoding="utf-8",
+    )
+    pj_dir = root / plugin / ".claude-plugin"
+    pj_dir.mkdir(parents=True, exist_ok=True)
+    (pj_dir / "plugin.json").write_text(json.dumps({"name": plugin_name}), encoding="utf-8")
+
+
+def test_manifest_valid(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _write_manifests(tmp_path, "lab-test", "lab-test")
+    v = run_validator(tmp_path)
+    assert not v.errors
+    assert not any("plugin.json が存在しない" in w for w in v.warnings)
+
+
+def test_manifest_name_mismatch(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _write_manifests(tmp_path, "lab-test", "wrong-name")
+    v = run_validator(tmp_path)
+    assert any("不一致" in e for e in v.errors)
+
+
+def test_manifest_unlisted_plugin(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _write_manifests(tmp_path, "lab-test", "lab-test", list_in_market=False)
+    v = run_validator(tmp_path)
+    assert any("未登録" in e for e in v.errors)
+
+
+# --- command frontmatter / plugin README -----------------------------------
+
+def _add_command(root: Path, plugin: str, name="cmd", frontmatter='description: "x"\nallowed-tools: Read'):
+    d = root / plugin / ".claude" / "commands"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{name}.md").write_text(f"---\n{frontmatter}\n---\n\n## 手順\n", encoding="utf-8")
+
+
+def test_command_requires_description(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _add_command(tmp_path, "lab-test", frontmatter="allowed-tools: Read")  # description なし
+    v = run_validator(tmp_path)
+    assert any("command frontmatter に description" in e for e in v.errors)
+
+
+def test_command_missing_allowed_tools_warns(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")
+    _add_command(tmp_path, "lab-test", frontmatter='description: "x"')  # allowed-tools なし
+    v = run_validator(tmp_path)
+    assert any("allowed-tools" in w for w in v.warnings)
+
+
+def test_plugin_missing_readme_warns(tmp_path):
+    make_plugin(tmp_path, plugin="lab-test")  # README を作らない
+    v = run_validator(tmp_path)
+    assert any("README.md がない" in w for w in v.warnings)
+
+
+# --- スキル相互参照 ---------------------------------------------------------
+
+def test_skill_ref_to_nonexistent_errors(tmp_path):
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `nonexistent-skill` skill — x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("参照スキル 'nonexistent-skill' が存在しない" in e for e in v.errors)
+
+
+def test_skill_ref_roadmap_marker_ok(tmp_path):
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `future-skill` skill（Roadmap: 未収録）— x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert not any("future-skill" in e for e in v.errors)
+
+
+def test_skill_ref_valid_ok(tmp_path):
+    foo = make_skill_md(name="foo", extra="\n## 参照\n- `bar` skill — x\n")
+    bar = make_skill_md(name="bar")
+    make_plugin(tmp_path, plugin="lab-test", skills={"foo": foo, "bar": bar})
+    v = run_validator(tmp_path)
+    assert not any("bar" in e and "存在しない" in e for e in v.errors)
+
+
+def test_skill_ref_qualified_dangling_errors(tmp_path):
+    # `plugin/skill` 修飾形式の宙ぶらりん参照も検出されること（R5 で塞いだギャップ）
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `other-plugin/missing-skill` skill — x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("other-plugin/missing-skill" in e for e in v.errors)

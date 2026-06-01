@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lab-automation-architecture",
+  "displayName": "Lab Automation Architecture",
+  "version": "1.0.0",
+  "description": "自動化の可否判断・フロー設計・障害設計。feasibility から monitoring まで自動化品質を点検する Skill 群。",
+  "author": {
+    "name": "thinkyou0714"
+  },
+  "homepage": "https://github.com/thinkyou0714/claude-lab-skills",
+  "repository": "https://github.com/thinkyou0714/claude-lab-skills",
+  "license": "MIT",
+  "keywords": ["automation", "n8n", "failure-design", "monitoring"],
+  "skills": "./skills/",
+  "commands": "./.claude/commands/"
+}

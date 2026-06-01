@@ -87,7 +87,7 @@ description: "設計・実装・運用の判断に対して、見落としがち
 | 自動化フロー | — | n8n / Webhook / 自動処理の障害リスクを含んでいるか |
 | データ / 認証 / ログ | — | RLS・Supabase Auth・audit_log のリスクを確認したか |
 | 実装 / 運用フロー | — | デプロイ・ロールバック・監視のリスクを含んでいるか |
-| 非エンジニア理解可能性 | — | リスク説明が Rikuto 以外にも説明できる言葉か |
+| 非エンジニア理解可能性 | — | リスク説明が 非エンジニアにも説明できる言葉か |
 | 会員共有 / 再利用耐性 | — | このリスクスキャンが他ケースにも転用できる形か |
 | 他LLM移植耐性 | — | Claude 固有の判断基準に依存していないか |
 
@@ -110,5 +110,5 @@ description: "設計・実装・運用の判断に対して、見落としがち
 - `issue-framing` skill — リスクスキャン前の論点整理に使う
 - `assumption-audit` skill — リスクの根拠となる前提を洗い出す
 - `failure-point-review` skill（lab-automation-architecture）— 自動化フロー固有のリスクを深掘り
-- `auth-boundary-check` skill（lab-data-auth-ops）— 認証・認可リスクの詳細確認
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — ロールバック条件の定義
+- `auth-boundary-check` skill（Roadmap: lab-data-auth-ops、本リポジトリ未収録）— 認証・認可リスクの詳細確認
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — ロールバック条件の定義

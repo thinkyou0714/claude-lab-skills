@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lab-communication-translation",
+  "displayName": "Lab Communication Translation",
+  "version": "1.0.0",
+  "description": "非エンジニア翻訳・要約構造化・ドキュメント再利用性・他LLM移植性レビュー・知識記録変換の Skill 群。",
+  "author": {
+    "name": "thinkyou0714"
+  },
+  "homepage": "https://github.com/thinkyou0714/claude-lab-skills",
+  "repository": "https://github.com/thinkyou0714/claude-lab-skills",
+  "license": "MIT",
+  "keywords": ["translation", "summary", "documentation", "portability"],
+  "skills": "./skills/",
+  "commands": "./.claude/commands/"
+}

@@ -22,13 +22,13 @@
 ### Command 名（動詞句）
 
 - 形式: `動詞` または `動詞-対象`（kebab-case）
-- 例: `/think`, `/automation-review`, `/handoff-impl`
+- 例: `/think`, `/automation-review`, `/impl-gate`
 - Command は複数の Skill を束ねる入口として設計する
 
 ### Plugin 名
 
 - 形式: `lab-<領域>` プレフィックス必須
-- 例: `lab-thinking-core`, `lab-data-auth-ops`
+- 例: `lab-thinking-core`, `lab-implementation-flow`
 
 ---
 
@@ -41,7 +41,7 @@
 
 ### 2. ディレクトリ作成
 
-```
+```text
 lab-skills/
 └─ <plugin-name>/
    └─ skills/
@@ -123,7 +123,7 @@ description: "<1〜2文で責務を説明。使う場面を含めること>"
 
 ### 4. README.md の更新
 
-追加した Skill は plugin ディレクトリの README（存在する場合）または lab-skills/README.md の Plugin 一覧に反映する。
+追加した Skill は plugin ディレクトリの README（存在する場合）または README.md の Plugin 一覧に反映する。
 
 ---
 
@@ -133,7 +133,7 @@ Command は Skill の薄いアダプタです。Command 自体に判断ロジッ
 
 ### 配置
 
-```
+```text
 lab-skills/<plugin-name>/.claude/commands/<command-name>.md
 ```
 
@@ -141,7 +141,7 @@ lab-skills/<plugin-name>/.claude/commands/<command-name>.md
 
 ```bash
 # リポジトリルートから実行
-cp lab-skills/<plugin-name>/.claude/commands/<command-name>.md .claude/commands/<command-name>.md
+cp <plugin-name>/.claude/commands/<command-name>.md .claude/commands/<command-name>.md
 ```
 
 ### フォーマット
@@ -177,6 +177,9 @@ allowed-tools: Read,Grep
 - [ ] 人間の意思決定余地が残されている
 - [ ] Guardrails セクションが省略されていない
 - [ ] LAB Cross-Check セクションが省略されていない
+- [ ] 個人名・内部コードネーム・私的パスを含まない（GATE-3 / 非エンジニアにも通じる一般語にする）
+- [ ] 追加・変更した plugin の `README.md` を更新した
+- [ ] `python validate_plugins.py --strict` がグリーン（整合性 + リンク + マニフェスト）
 
 ---
 
