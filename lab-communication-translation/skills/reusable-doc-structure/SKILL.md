@@ -103,5 +103,5 @@ description: "ドキュメントの構造が、目的・読み手・更新頻度
 - `onboarding-readability` skill — 設計後の可読性チェック
 - `llm-portability-review` skill — 他LLMへの移植耐性チェック
 - `summary-structuring` skill — ドキュメント内容の構造化要約
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — ドキュメント設計の実例
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 設計決定記録の構造例
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — ドキュメント設計の実例
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 設計決定記録の構造例

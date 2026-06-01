@@ -104,5 +104,5 @@ description: "実装に入ってよい状態かを確認する。要件・設計
 - `change-impact-scan` skill — 影響範囲の深掘り
 - `test-scope-definition` skill — テストスコープの定義
 - `rollback-plan` skill — ロールバック方針の詳細設計
-- [docs/TASKS.md](../../../../docs/TASKS.md) — 現在のタスク状態
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 設計決定記録（ADR）
+- [docs/TASKS.md](../../../docs/TASKS.md) — 現在のタスク状態
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 設計決定記録（ADR）

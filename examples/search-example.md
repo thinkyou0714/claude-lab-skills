@@ -13,7 +13,7 @@ _`src/lab-core/scripts/search.py` の使い方を示す例です。_
 python src/lab-core/scripts/search.py "判断ゲート"
 
 # 特定ディレクトリに絞る
-python src/lab-core/scripts/search.py "BtoB" --path src/lab-strategy
+python src/lab-core/scripts/search.py "ROI" --path src/lab-core
 
 # rules ディレクトリだけ検索
 python src/lab-core/scripts/search.py "アンチパターン" --tag rules
@@ -27,14 +27,20 @@ python src/lab-core/scripts/search.py "価格" --ext .md .json .csv
 ## 出力例
 
 ```
-[検索結果] キーワード: '判断ゲート' — 2 ファイルにマッチ
+[検索結果] キーワード: '判断ゲート' — 4 ファイルにマッチ
+
+  src/lab-core/data/glossary.md
+    L25: | 判断ゲート | 次フェーズへ進む前に答えるべき Yes/No の問いの集合。... |
+
+  src/lab-core/rules/cost-comparison.md
+    L57: - 判断ゲート GATE-4（費用対効果ゲート）: `judgment-gates.md`
 
   src/lab-core/rules/judgment-gates.md
     L1: # 判断ゲート — lab-core 共通基盤
-    L15: ## GATE-1: 実装着手ゲート
+    L20: ## GATE-2: 自動化判断ゲート
 
-  src/lab-core/data/glossary.md
-    L12: | 判断ゲート | 次フェーズへ進む前に答えるべき Yes/No の問い |
+  src/lab-core/templates/skill-template.md
+    L71: - `src/lab-core/rules/judgment-gates.md` — 判断ゲートとの整合性
 ```
 
 ---

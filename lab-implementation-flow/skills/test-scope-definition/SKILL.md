@@ -104,4 +104,4 @@ description: "実装・変更に対して何をどこまでテストすべきか
 - `implementation-gate` skill — テストスコープ確認を含む実装着手前チェック
 - `change-impact-scan` skill — テスト対象の影響範囲洗い出し
 - `patch-readiness` skill — パッチ適用前のテスト準備確認
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — 技術スタック・テストツール
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — 技術スタック・テストツール

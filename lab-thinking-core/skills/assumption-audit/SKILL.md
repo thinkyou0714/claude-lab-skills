@@ -100,5 +100,5 @@ description: "設計・仕様・計画に埋め込まれた前提を洗い出し
 
 - `issue-framing` skill — 前提洗い出し前の論点整理に使う
 - `risk-scan` skill — 前提崩壊のリスクを深掘りしたい場合に使う
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 過去の設計決定と前提を確認する
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 過去の設計決定と前提を確認する
 - `boundary-check` skill — 前提に関わるスコープの境界を確認したい場合に使う

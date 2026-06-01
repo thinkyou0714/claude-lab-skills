@@ -105,5 +105,5 @@ description: "リポジトリのディレクトリ構造・命名規則・ファ
 
 - `change-impact-scan` skill — ファイル移動の影響範囲確認
 - `implementation-gate` skill — 実装着手前の全体チェック
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — 技術スタック・ディレクトリ構造
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 構造に関する設計決定記録（ADR）
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — 技術スタック・ディレクトリ構造
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 構造に関する設計決定記録（ADR）

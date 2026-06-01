@@ -22,13 +22,13 @@
 ### Command 名（動詞句）
 
 - 形式: `動詞` または `動詞-対象`（kebab-case）
-- 例: `/think`, `/automation-review`, `/handoff-impl`
+- 例: `/think`, `/automation-review`, `/impl-gate`
 - Command は複数の Skill を束ねる入口として設計する
 
 ### Plugin 名
 
 - 形式: `lab-<領域>` プレフィックス必須
-- 例: `lab-thinking-core`, `lab-data-auth-ops`
+- 例: `lab-thinking-core`, `lab-implementation-flow`
 
 ---
 
@@ -123,7 +123,7 @@ description: "<1〜2文で責務を説明。使う場面を含めること>"
 
 ### 4. README.md の更新
 
-追加した Skill は plugin ディレクトリの README（存在する場合）または lab-skills/README.md の Plugin 一覧に反映する。
+追加した Skill は plugin ディレクトリの README（存在する場合）または README.md の Plugin 一覧に反映する。
 
 ---
 
@@ -141,7 +141,7 @@ lab-skills/<plugin-name>/.claude/commands/<command-name>.md
 
 ```bash
 # リポジトリルートから実行
-cp lab-skills/<plugin-name>/.claude/commands/<command-name>.md .claude/commands/<command-name>.md
+cp <plugin-name>/.claude/commands/<command-name>.md .claude/commands/<command-name>.md
 ```
 
 ### フォーマット

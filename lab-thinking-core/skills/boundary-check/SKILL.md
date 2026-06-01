@@ -112,4 +112,4 @@ description: "設計・実装・施策のスコープの境界を確認し、や
 - `assumption-audit` — スコープの前提を洗い出す
 - `scope-design` skill（lab-strategy-design）— 戦略的なスコープ設計
 - `implementation-gate` skill（lab-implementation-flow）— 実装前の最終スコープ確認
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — フェーズ分けの過去決定
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — フェーズ分けの過去決定

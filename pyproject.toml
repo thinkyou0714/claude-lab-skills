@@ -1,0 +1,29 @@
+[project]
+name = "lab-skills"
+version = "1.0.0"
+description = "THINK YOU LAB 思考OS — 再利用可能な判断資産（Skill）リポジトリ"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+
+# ランタイム依存なし（標準ライブラリのみ）。dev ツールは下記 optional に分離。
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+extend-exclude = [".git", "__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "E501",  # 行長は line-length とフォーマッタに委ねる（日本語コメントで超過しやすい）
+]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src/lab-core/scripts"]
+testpaths = ["tests"]
+addopts = "-q"

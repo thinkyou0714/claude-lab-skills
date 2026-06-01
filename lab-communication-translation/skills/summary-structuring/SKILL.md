@@ -111,4 +111,4 @@ description: "長文の技術ドキュメント・会話ログ・実装結果を
 - `stakeholder-translation` skill — ステークホルダー向けの言語変換
 - `reusable-doc-structure` skill — 再利用可能なドキュメント構造設計
 - `onboarding-readability` skill — ドキュメントの読みやすさチェック
-- [docs/TASKS.md](../../../../docs/TASKS.md) — 引き継ぎ用サマリーの参照例
+- [docs/TASKS.md](../../../docs/TASKS.md) — 引き継ぎ用サマリーの参照例

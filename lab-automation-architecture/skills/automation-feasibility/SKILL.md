@@ -105,4 +105,4 @@ description: "手動で行っている作業・プロセスを自動化できる
 - `trigger-action-map` skill — 自動化フローのトリガー・アクション設計
 - `failure-point-review` skill — 自動化フローの障害点を深掘り
 - `monitoring-alert-design` skill — 自動化の監視設計
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — n8n 自動化の現状
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — n8n 自動化の現状

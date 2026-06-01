@@ -1,0 +1,28 @@
+# pre-commit フック設定（任意導入）
+#   インストール: pip install pre-commit && pre-commit install
+#   全ファイル実行: pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+
+  - repo: local
+    hooks:
+      - id: validate-plugins
+        name: validate lab-skills plugins (strict + links)
+        entry: python validate_plugins.py --strict
+        language: system
+        pass_filenames: false
+        files: \.(md|py)$

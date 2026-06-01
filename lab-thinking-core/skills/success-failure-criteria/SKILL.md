@@ -119,5 +119,5 @@ description: "施策・実装・設計の成功条件と失敗条件を測定可
 - `issue-framing` — 成功・失敗条件定義前の論点整理
 - `boundary-check` — スコープ確定後に成功条件を定義する
 - `implementation-gate` skill（lab-implementation-flow）— 実装前に成功条件を確認
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — P0 の成功条件・ロールバック条件の定義
-- [docs/TASKS.md](../../../../docs/TASKS.md) — 現在のタスクの完了定義
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — P0 の成功条件・ロールバック条件の定義
+- [docs/TASKS.md](../../../docs/TASKS.md) — 現在のタスクの完了定義

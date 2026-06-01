@@ -111,4 +111,4 @@ description: "設計・実装・運用の判断に対して、見落としがち
 - `assumption-audit` skill — リスクの根拠となる前提を洗い出す
 - `failure-point-review` skill（lab-automation-architecture）— 自動化フロー固有のリスクを深掘り
 - `auth-boundary-check` skill（lab-data-auth-ops）— 認証・認可リスクの詳細確認
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — ロールバック条件の定義
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — ロールバック条件の定義

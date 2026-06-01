@@ -143,4 +143,4 @@ description: "重要な判断を前に、論点・選択肢・コスト比較・
 - `risk-scan` skill — 各選択肢のリスクを深掘りする
 - `critique-panel` skill — 選択肢に批判的検討を加える
 - `tradeoff-analysis` skill — 選択肢間のトレードオフを詳細に分析する
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — ADR 記録（判断後に追記）
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — ADR 記録（判断後に追記）

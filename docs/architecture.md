@@ -23,14 +23,14 @@ AIツール向けは「薄いアダプター」として生成する。
 ```
 ┌─────────────────────────────────────────┐
 │  Layer 0: Source of Truth               │
-│  src/lab-core/, src/lab-strategy/ 等    │
+│  src/lab-core/ ほか（領域別は Roadmap）  │
 │  → Markdown/CSV/JSON の軽量データ      │
 │  → ルール・用語・テンプレートの正本    │
 └─────────────────────────────────────────┘
            ↓ 参照・生成
 ┌─────────────────────────────────────────┐
 │  Layer 1: AI アダプター（Plugin 層）    │
-│  lab-thinking-core/, lab-strategy-design/ 等 │
+│  lab-thinking-core/, lab-automation-architecture/ 等 │
 │  → SKILL.md（AI向けに最適化した表現）  │
 │  → 既存の Plugin/Skill/Command 構造     │
 └─────────────────────────────────────────┘
@@ -50,7 +50,7 @@ AIツール向けは「薄いアダプター」として生成する。
 | ディレクトリ | 役割 | 現状 |
 |-------------|------|------|
 | `src/lab-core/` | 全スキル共通の基盤（用語・ゲート・アンチパターン・コスト比較）| 実装済み |
-| `src/lab-strategy/` | 事業設計（顧客課題・提供価値・競争回避・価格）| 実装済み |
+| `src/lab-strategy/` | 事業設計（顧客課題・提供価値・競争回避・価格）| 未収録（Roadmap）|
 | `src/lab-system-design/` | n8n前提の自動化設計 | 予約済み（未実装）|
 | `src/lab-data-auth/` | Supabase前提の認証・データ設計 | 予約済み（未実装）|
 | `src/lab-implementation-ops/` | 実装運用規律（PR・ロールバック・AI指示）| 予約済み（未実装）|

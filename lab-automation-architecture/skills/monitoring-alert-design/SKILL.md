@@ -43,7 +43,7 @@ description: "自動化フロー・システムの監視項目とアラート条
 - **目的妥当性**: 監視項目が実際の障害検知に対して有効か
 - **範囲の過不足**: 重要なシステムが監視対象から漏れていないか
 - **中長期リスク**: アラートが多すぎて無視されるリスク（アラート疲労）
-- **LAB全体との整合性**: Slack 通知仕様（slack-notification-spec.md）と整合しているか
+- **LAB全体との整合性**: 通知仕様（チャネル・重大度・宛先・初動手順）が定義されているか
 - **非エンジニア理解可能性**: 「何かおかしい時に通知が来る」を説明できるか
 - **他LLM移植耐性**: 設計が Slack 固有に過度に依存していないか
 
@@ -91,4 +91,5 @@ description: "自動化フロー・システムの監視項目とアラート条
 
 - `failure-point-review` skill — 何を監視すべきかの障害点特定
 - `trigger-action-map` skill — フローのどのステップを監視するか
-- [docs/slack-notification-spec.md](../../../../docs/slack-notification-spec.md) — Slack 通知仕様
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — 通知先・チャネルの技術スタック文脈
+- [judgment-gates.md](../../../src/lab-core/rules/judgment-gates.md) — 自動化判断ゲート（GATE-2）

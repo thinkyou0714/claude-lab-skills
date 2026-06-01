@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lab-implementation-flow",
+  "displayName": "Lab Implementation Flow",
+  "version": "1.0.0",
+  "description": "実装着手ゲート・影響範囲スキャン・施工AIへの handoff。実装前後の規律を担保する Skill 群。",
+  "author": {
+    "name": "thinkyou0714"
+  },
+  "homepage": "https://github.com/thinkyou0714/claude-lab-skills",
+  "repository": "https://github.com/thinkyou0714/claude-lab-skills",
+  "license": "MIT",
+  "keywords": ["implementation", "rollback", "impact-analysis", "handoff"],
+  "skills": "./skills/",
+  "commands": "./.claude/commands/"
+}

@@ -95,8 +95,8 @@ description: "曖昧な相談を、論点・目的・成功条件・失敗条件
 
 ## Further Reading
 
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — プロジェクト背景・現フェーズ
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 過去の設計決定（再議論しない）
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — プロジェクト背景・現フェーズ
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 過去の設計決定（再議論しない）
 - `assumption-audit` skill — 前提を洗い出したい場合に続けて使う
 - `risk-scan` skill — リスクをより深掘りしたい場合に使う
 - `decision-materials` skill — 判断材料を整理したい場合に使う

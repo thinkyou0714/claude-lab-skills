@@ -7,18 +7,32 @@ validate_plugins.py — lab-skills 整合性検証スクリプト
   2. 各 skill ディレクトリに SKILL.md が存在する（空ディレクトリ検出）
   3. SKILL.md の frontmatter に name: / description: が存在する
   4. frontmatter の name: がディレクトリ名と一致する
-  5. SKILL.md に必須セクションが存在する
-  6. command ファイルが参照する SKILL.md が実際に存在する
+  5. name: が kebab-case（^[a-z0-9]+(-[a-z0-9]+)*$）かつ 64 文字以内
+  6. name: がリポジトリ全体で一意（重複検出）
+  7. description: が空でない / 長すぎない（<= 1024 文字）
+  8. SKILL.md に必須セクションが存在する
+  9. command ファイルが参照する SKILL.md が実際に存在する
+ 10. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
+ 11. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
 
 使い方:
   python validate_plugins.py [--root <lab-skills のパス>] [--verbose]
+                             [--strict] [--no-check-links] [--json]
+
+終了コード:
+  0 = 成功（--strict 時は warning も無いこと）
+  1 = 失敗（error あり、または --strict 時に warning あり）
 """
 
-import os
+from __future__ import annotations
+
+import argparse
+import json
 import re
 import sys
-import argparse
 from pathlib import Path
+
+VERSION = "1.0.0"
 
 # 必須セクション（## で始まる見出し）
 REQUIRED_SECTIONS = [
@@ -37,8 +51,72 @@ REQUIRED_SECTIONS = [
 # plugin ディレクトリのプレフィックス（検出対象）
 PLUGIN_PREFIX = "lab-"
 
-# スキップするディレクトリ名
-SKIP_DIRS = {".git", "__pycache__", ".claude", "src"}
+# plugin 検出時にスキップするディレクトリ名
+SKIP_DIRS = {".git", "__pycache__", ".claude", "src", "node_modules"}
+
+# リンク検査時にスキップするディレクトリ名（VCS・キャッシュのみ）
+LINK_SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache"}
+
+# skill name の許容形式（kebab-case）と長さ上限
+SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+MAX_NAME_LEN = 64
+MAX_DESC_LEN = 1024
+
+# Markdown リンク・コードフェンスのパターン
+MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
+INLINE_CODE_RE = re.compile(r"`[^`]*`")
+
+
+def normalize_newlines(content: str) -> str:
+    """CRLF / CR を LF に正規化する。"""
+    return content.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def parse_frontmatter(content: str) -> dict:
+    """--- ... --- ブロックから key: value を抽出する（簡易パーサー）。
+
+    - CRLF 耐性あり
+    - 行頭 # のコメント行は無視
+    - 値を囲む " または ' を1組だけ除去
+    """
+    result: dict[str, str] = {}
+    content = normalize_newlines(content)
+    match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    if not match:
+        return result
+    for raw in match.group(1).splitlines():
+        line = raw.rstrip()
+        stripped = line.lstrip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if ":" in line:
+            key, _, value = line.partition(":")
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                value = value[1:-1]
+            result[key.strip()] = value
+    return result
+
+
+def extract_sections(content: str) -> set[str]:
+    """## セクション見出しを抽出する。"""
+    content = normalize_newlines(content)
+    return {m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)}
+
+
+def extract_command_skill_refs(content: str) -> list[str]:
+    """command ファイルから '- skill-name: <path>' 形式のパスを抽出する。"""
+    content = normalize_newlines(content)
+    return re.findall(r"^- \S+:\s+(\S+\.md)\s*$", content, re.MULTILINE)
+
+
+def extract_md_links(content: str) -> list[str]:
+    """Markdown リンク先を抽出する（コードフェンス/インラインコード内は無視）。"""
+    content = normalize_newlines(content)
+    content = FENCE_RE.sub("", content)
+    content = INLINE_CODE_RE.sub("", content)
+    return MD_LINK_RE.findall(content)
 
 
 def find_plugins(root: Path) -> list[Path]:
@@ -62,98 +140,118 @@ def find_command_files(plugin: Path) -> list[Path]:
     return sorted(f for f in commands_dir.iterdir() if f.suffix == ".md")
 
 
-def parse_frontmatter(content: str) -> dict:
-    """--- ... --- ブロックから key: value を抽出する（簡易パーサー）"""
-    result = {}
-    match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
-    if not match:
-        return result
-    for line in match.group(1).splitlines():
-        if ":" in line:
-            key, _, value = line.partition(":")
-            result[key.strip()] = value.strip().strip('"')
-    return result
-
-
-def extract_sections(content: str) -> set[str]:
-    """## セクション見出しを抽出する"""
-    return {m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)}
-
-
-def extract_command_skill_refs(content: str) -> list[str]:
-    """command ファイルから '- skill-name: <path>' 形式のパスを抽出する"""
-    return re.findall(r"^- \S+:\s+(\S+\.md)\s*$", content, re.MULTILINE)
+def read_text(path: Path) -> str | None:
+    """UTF-8 として読む。失敗したら None。"""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return None
 
 
 class Validator:
-    def __init__(self, root: Path, verbose: bool = False):
+    def __init__(
+        self,
+        root: Path,
+        verbose: bool = False,
+        strict: bool = False,
+        check_links: bool = True,
+        out=None,
+    ):
         self.root = root
         self.verbose = verbose
+        self.strict = strict
+        self.check_links_enabled = check_links
+        self.out = out if out is not None else sys.stdout
         self.errors: list[str] = []
         self.warnings: list[str] = []
         self.ok_count = 0
+        self.seen_names: dict[str, Path] = {}
 
-    def err(self, msg: str):
+    def err(self, msg: str) -> None:
         self.errors.append(f"  [ERROR] {msg}")
 
-    def warn(self, msg: str):
+    def warn(self, msg: str) -> None:
         self.warnings.append(f"  [WARN]  {msg}")
 
-    def ok(self, msg: str):
+    def ok(self, msg: str) -> None:
         self.ok_count += 1
         if self.verbose:
-            print(f"  [OK]    {msg}")
+            print(f"  [OK]    {msg}", file=self.out)
 
-    def validate_skill(self, skill_dir: Path):
+    def rel(self, path: Path) -> str:
+        try:
+            return str(path.relative_to(self.root))
+        except ValueError:
+            return str(path)
+
+    def validate_skill(self, skill_dir: Path) -> None:
         skill_md = skill_dir / "SKILL.md"
 
         # 2. SKILL.md 存在確認
         if not skill_md.exists():
-            self.err(f"{skill_dir.relative_to(self.root)}: SKILL.md が存在しない（空ディレクトリ）")
+            self.err(f"{self.rel(skill_dir)}: SKILL.md が存在しない（空ディレクトリ）")
             return
 
-        content = skill_md.read_text(encoding="utf-8")
+        content = read_text(skill_md)
+        if content is None:
+            self.err(f"{self.rel(skill_md)}: UTF-8 として読み込めない")
+            return
+
+        rel = self.rel(skill_md)
 
         # 3. frontmatter 確認
         fm = parse_frontmatter(content)
         if "name" not in fm:
-            self.err(f"{skill_md.relative_to(self.root)}: frontmatter に name: がない")
+            self.err(f"{rel}: frontmatter に name: がない")
         if "description" not in fm:
-            self.err(f"{skill_md.relative_to(self.root)}: frontmatter に description: がない")
+            self.err(f"{rel}: frontmatter に description: がない")
 
-        # 4. name: とディレクトリ名の一致確認
-        if "name" in fm and fm["name"] != skill_dir.name:
-            self.err(
-                f"{skill_md.relative_to(self.root)}: name: '{fm['name']}' が"
-                f"ディレクトリ名 '{skill_dir.name}' と不一致"
-            )
+        # 4-6. name 検証
+        if "name" in fm:
+            name = fm["name"]
+            if name != skill_dir.name:
+                self.err(f"{rel}: name: '{name}' がディレクトリ名 '{skill_dir.name}' と不一致")
+            if not SKILL_NAME_RE.match(name):
+                self.err(f"{rel}: name: '{name}' は kebab-case ではない（^[a-z0-9]+(-[a-z0-9]+)*$）")
+            if len(name) > MAX_NAME_LEN:
+                self.err(f"{rel}: name: が長すぎる（{len(name)} > {MAX_NAME_LEN} 文字）")
+            if name in self.seen_names:
+                self.err(f"{rel}: name: '{name}' が重複（既出: {self.rel(self.seen_names[name])}）")
+            else:
+                self.seen_names[name] = skill_md
 
-        # 5. 必須セクション確認
+        # 7. description 検証
+        if "description" in fm:
+            desc = fm["description"]
+            if not desc:
+                self.err(f"{rel}: description: が空")
+            elif len(desc) > MAX_DESC_LEN:
+                self.warn(f"{rel}: description: が長い（{len(desc)} > {MAX_DESC_LEN} 文字）")
+            else:
+                self.ok(f"{rel}: description ({len(desc)} 文字)")
+
+        # 8. 必須セクション確認
         sections = extract_sections(content)
         for required in REQUIRED_SECTIONS:
             if required not in sections:
-                self.err(f"{skill_md.relative_to(self.root)}: 必須セクション '## {required}' がない")
+                self.err(f"{rel}: 必須セクション '## {required}' がない")
             else:
-                self.ok(f"{skill_md.relative_to(self.root)}: ## {required}")
+                self.ok(f"{rel}: ## {required}")
 
-    def validate_command(self, command_file: Path, plugin: Path):
-        content = command_file.read_text(encoding="utf-8")
-        refs = extract_command_skill_refs(content)
-
-        # 6. 参照先 SKILL.md の存在確認
-        for ref_path in refs:
-            # command ファイルからの相対パスを解決
+    def validate_command(self, command_file: Path) -> None:
+        content = read_text(command_file)
+        if content is None:
+            self.err(f"{self.rel(command_file)}: UTF-8 として読み込めない")
+            return
+        for ref_path in extract_command_skill_refs(content):
             resolved = (command_file.parent / ref_path).resolve()
             if not resolved.exists():
-                self.err(
-                    f"{command_file.relative_to(self.root)}: "
-                    f"参照先 '{ref_path}' が存在しない"
-                )
+                self.err(f"{self.rel(command_file)}: 参照先 '{ref_path}' が存在しない")
             else:
-                self.ok(f"{command_file.relative_to(self.root)}: 参照先 '{ref_path}' 確認済み")
+                self.ok(f"{self.rel(command_file)}: 参照先 '{ref_path}' 確認済み")
 
-    def validate_plugin(self, plugin: Path):
-        print(f"\nPlugin: {plugin.name}")
+    def validate_plugin(self, plugin: Path) -> None:
+        print(f"\nPlugin: {plugin.name}", file=self.out)
 
         # 1. skills/ ディレクトリ存在確認
         skills_dir = plugin / "skills"
@@ -168,63 +266,184 @@ class Validator:
             for skill_dir in skill_dirs:
                 self.validate_skill(skill_dir)
 
-        # command 検証
-        command_files = find_command_files(plugin)
-        for cmd in command_files:
-            self.validate_command(cmd, plugin)
+        for cmd in find_command_files(plugin):
+            self.validate_command(cmd)
+
+    def validate_links(self) -> None:
+        """リポジトリ内の全 .md の相対リンク健全性を検査する。"""
+        print("\nリンク検査: リポジトリ内 .md の相対リンク", file=self.out)
+        md_files = [
+            p for p in sorted(self.root.rglob("*.md"))
+            if not (set(p.relative_to(self.root).parts) & LINK_SKIP_DIRS)
+        ]
+        for md in md_files:
+            content = read_text(md)
+            if content is None:
+                self.err(f"{self.rel(md)}: UTF-8 として読み込めない")
+                continue
+            for target in extract_md_links(content):
+                t = target.strip()
+                if t.startswith(("http://", "https://", "mailto:", "#")):
+                    continue
+                path_part = t.split("#", 1)[0].strip()
+                if not path_part:
+                    continue
+                resolved = (md.parent / path_part).resolve()
+                try:
+                    resolved.relative_to(self.root)
+                    inside = True
+                except ValueError:
+                    inside = False
+                if not inside:
+                    self.err(f"{self.rel(md)}: リンク '{t}' がリポジトリ外を指す")
+                elif not resolved.exists():
+                    self.err(f"{self.rel(md)}: リンク先 '{t}' が存在しない")
+                else:
+                    self.ok(f"{self.rel(md)}: リンク '{t}'")
+
+    def _load_json(self, path: Path):
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+            self.err(f"{self.rel(path)}: JSON として読めない（{e}）")
+            return None
+
+    def validate_manifests(self, plugins: list[Path]) -> None:
+        """.claude-plugin/ の marketplace.json / plugin.json の整合を検査する。"""
+        print("\nマニフェスト検査: .claude-plugin/", file=self.out)
+
+        listed_names: set[str] = set()
+        market = self.root / ".claude-plugin" / "marketplace.json"
+        if not market.exists():
+            self.warn(".claude-plugin/marketplace.json が存在しない")
+        else:
+            data = self._load_json(market)
+            if isinstance(data, dict):
+                if not data.get("name"):
+                    self.err(f"{self.rel(market)}: name がない")
+                owner = data.get("owner")
+                if not isinstance(owner, dict) or not owner.get("name"):
+                    self.err(f"{self.rel(market)}: owner.name がない")
+                for entry in data.get("plugins", []):
+                    if not isinstance(entry, dict):
+                        continue
+                    if entry.get("name"):
+                        listed_names.add(entry["name"])
+                    src = entry.get("source")
+                    if src:
+                        resolved = (self.root / src).resolve()
+                        if not resolved.exists():
+                            self.err(f"{self.rel(market)}: source '{src}' が存在しない")
+                        else:
+                            self.ok(f"marketplace source '{src}'")
+
+        for plugin in plugins:
+            pj = plugin / ".claude-plugin" / "plugin.json"
+            if not pj.exists():
+                self.warn(f"{plugin.name}: .claude-plugin/plugin.json が存在しない")
+            else:
+                data = self._load_json(pj)
+                if isinstance(data, dict):
+                    name = data.get("name")
+                    if not name:
+                        self.err(f"{self.rel(pj)}: name がない")
+                    elif name != plugin.name:
+                        self.err(
+                            f"{self.rel(pj)}: name '{name}' がディレクトリ名 '{plugin.name}' と不一致"
+                        )
+                    else:
+                        self.ok(f"{self.rel(pj)}: name 一致")
+            if market.exists() and plugin.name not in listed_names:
+                self.err(f"{plugin.name}: marketplace.json の plugins に未登録")
 
     def run(self) -> bool:
         plugins = find_plugins(self.root)
         if not plugins:
-            print(f"[ERROR] {self.root} に plugin が見つかりません（'{PLUGIN_PREFIX}*' ディレクトリ）")
+            print(
+                f"[ERROR] {self.root} に plugin が見つかりません（'{PLUGIN_PREFIX}*' ディレクトリ）",
+                file=self.out,
+            )
             return False
 
-        print(f"lab-skills 検証開始: {self.root}")
-        print(f"対象 plugin 数: {len(plugins)}")
+        print(f"lab-skills 検証開始: {self.root}", file=self.out)
+        print(f"対象 plugin 数: {len(plugins)}", file=self.out)
 
         for plugin in plugins:
             self.validate_plugin(plugin)
 
+        if self.check_links_enabled:
+            self.validate_links()
+
+        self.validate_manifests(plugins)
+
         # 結果サマリー
-        print(f"\n{'='*60}")
-        print(f"結果サマリー")
-        print(f"  OK:      {self.ok_count} 件")
-        print(f"  WARN:    {len(self.warnings)} 件")
-        print(f"  ERROR:   {len(self.errors)} 件")
+        print(f"\n{'=' * 60}", file=self.out)
+        print("結果サマリー", file=self.out)
+        print(f"  OK:      {self.ok_count} 件", file=self.out)
+        print(f"  WARN:    {len(self.warnings)} 件", file=self.out)
+        print(f"  ERROR:   {len(self.errors)} 件", file=self.out)
 
         if self.warnings:
-            print("\nWARNINGS:")
+            print("\nWARNINGS:", file=self.out)
             for w in self.warnings:
-                print(w)
+                print(w, file=self.out)
 
         if self.errors:
-            print("\nERRORS:")
+            print("\nERRORS:", file=self.out)
             for e in self.errors:
-                print(e)
-            print(f"\n検証失敗: {len(self.errors)} 件のエラーがあります")
+                print(e, file=self.out)
+
+        failed = bool(self.errors) or (self.strict and bool(self.warnings))
+        if failed:
+            reason = f"{len(self.errors)} 件のエラー"
+            if self.strict and self.warnings:
+                reason += f" / {len(self.warnings)} 件の警告（--strict）"
+            print(f"\n検証失敗: {reason} があります", file=self.out)
             return False
 
-        print("\n検証成功: すべてのチェックをパスしました")
+        print("\n検証成功: すべてのチェックをパスしました", file=self.out)
         return True
 
+    def summary_dict(self, success: bool) -> dict:
+        return {
+            "success": success,
+            "ok": self.ok_count,
+            "warnings": [w.strip() for w in self.warnings],
+            "errors": [e.strip() for e in self.errors],
+            "root": str(self.root),
+            "version": VERSION,
+        }
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser(description="lab-skills 整合性検証スクリプト")
+    parser.add_argument("--version", action="version", version=f"validate_plugins {VERSION}")
     parser.add_argument(
         "--root",
         type=Path,
         default=Path(__file__).parent,
         help="lab-skills ディレクトリのパス（デフォルト: スクリプトと同じディレクトリ）",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="OK 判定も出力する",
-    )
+    parser.add_argument("--verbose", action="store_true", help="OK 判定も出力する")
+    parser.add_argument("--strict", action="store_true", help="warning も失敗扱いにする")
+    parser.add_argument("--no-check-links", action="store_true", help="リンク検査を無効化する")
+    parser.add_argument("--json", action="store_true", help="結果を JSON で stdout に出力する")
     args = parser.parse_args()
 
-    validator = Validator(root=args.root.resolve(), verbose=args.verbose)
+    # --json 時は進捗ログを stderr へ送り、stdout を純粋な JSON に保つ
+    out = sys.stderr if args.json else sys.stdout
+    validator = Validator(
+        root=args.root.resolve(),
+        verbose=args.verbose,
+        strict=args.strict,
+        check_links=not args.no_check_links,
+        out=out,
+    )
     success = validator.run()
+
+    if args.json:
+        print(json.dumps(validator.summary_dict(success), ensure_ascii=False, indent=2))
+
     sys.exit(0 if success else 1)
 
 

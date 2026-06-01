@@ -100,5 +100,5 @@ description: "技術的な実装内容・判断・リスクを、非エンジニ
 
 - `summary-structuring` skill — 長文の技術内容を構造化して要約する
 - `onboarding-readability` skill — ドキュメントの読みやすさチェック
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — P0 LMS の事業文脈
-- [docs/DECISIONS.md](../../../../docs/DECISIONS.md) — 設計決定記録（ADR）
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — P0 LMS の事業文脈
+- [docs/DECISIONS.md](../../../docs/DECISIONS.md) — 設計決定記録（ADR）

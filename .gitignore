@@ -22,6 +22,11 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
 
 # --- OS ---
 .DS_Store

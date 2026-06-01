@@ -104,4 +104,4 @@ description: "ドキュメント・README・設計記録が、初めて読む人
 - `reusable-doc-structure` skill — ドキュメントの再利用可能な構造設計
 - `llm-portability-review` skill — 他LLMへの移植耐性チェック
 - `summary-structuring` skill — 長文ドキュメントの構造化要約
-- [docs/CONTEXT.md](../../../../docs/CONTEXT.md) — プロジェクト文脈ドキュメントの参照例
+- [docs/CONTEXT.md](../../../docs/CONTEXT.md) — プロジェクト文脈ドキュメントの参照例
