@@ -20,17 +20,18 @@ AI への丸投げではなく、**意思決定品質を高める論点整理・
 
 ## 現フェーズ（本リポジトリの収録範囲）
 
-本リポジトリ（公開版）には **思考OSの中核4プラグイン / 27スキル** を収録しています。
+本リポジトリ（公開版）には **思考OSの6プラグイン / 40スキル** を収録しています。
 
 | Plugin | 責務 | Skill 数 | Command |
 |---|---|---|---|
 | lab-thinking-core | 論点整理・前提検証・意思決定支援 | 8 | `/think` |
+| lab-strategy-design | 目標検証・代替案比較・スコープ設計・戦略査定 | 7 | `/strategy` `/strategy-review` |
 | lab-automation-architecture | 自動化可否判断・フロー設計・障害設計 | 6 | `/automation-review` |
+| lab-data-auth-ops | データ設計・認証境界・PII・監査ログ | 6 | `/data-review` |
 | lab-implementation-flow | 実装ゲート・影響範囲・施工AIへの handoff | 7 | `/impl-gate` |
 | lab-communication-translation | 非エンジニア翻訳・ドキュメント再利用性・知識記録変換 | 6 | `/translate` |
 
-事業設計（lab-strategy-design）・データ/認証（lab-data-auth-ops）は
-**Roadmap（本リポジトリ未収録）** です。README の「Roadmap」節を参照。
+`src/` の領域別 Source of Truth 層（`src/lab-strategy/` 等）は将来整備（現状の SoT は `src/lab-core/` のみ）。
 
 ---
 
