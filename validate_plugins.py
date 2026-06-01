@@ -70,8 +70,8 @@ MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 
-# スキル相互参照（`name` skill 形式）と「未収録」を許容する Roadmap マーカー
-SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]+)`\s*skill")
+# スキル相互参照（`name` skill / `plugin/name` skill 形式）と Roadmap マーカー
+SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]*(?:/[a-z0-9-]+)*)`\s*skill")
 ROADMAP_MARKERS = ("Roadmap", "未収録")
 
 
@@ -127,7 +127,7 @@ def extract_md_links(content: str) -> list[str]:
 
 
 def extract_skill_refs(content: str) -> list[tuple[str, str]]:
-    """'`name` skill' 形式のスキル参照を (name, 行テキスト) で返す（コードフェンス内は無視）。"""
+    """'`name` skill' / '`plugin/name` skill' 形式のスキル参照を (token, 行テキスト) で返す（コードフェンス内は無視）。"""
     content = normalize_newlines(content)
     content = FENCE_RE.sub("", content)
     out: list[tuple[str, str]] = []
@@ -350,14 +350,16 @@ class Validator:
                 content = read_text(md)
                 if content is None:
                     continue
-                for name, line in extract_skill_refs(content):
+                for token, line in extract_skill_refs(content):
+                    # `plugin/skill` 修飾も許容し、末尾セグメントで実在判定する
+                    name = token.rsplit("/", 1)[-1]
                     if name in valid:
-                        self.ok(f"{self.rel(md)}: skill ref '{name}'")
+                        self.ok(f"{self.rel(md)}: skill ref '{token}'")
                     elif any(mk in line for mk in ROADMAP_MARKERS):
-                        self.ok(f"{self.rel(md)}: skill ref '{name}'（Roadmap 明記）")
+                        self.ok(f"{self.rel(md)}: skill ref '{token}'（Roadmap 明記）")
                     else:
                         self.err(
-                            f"{self.rel(md)}: 参照スキル '{name}' が存在しない"
+                            f"{self.rel(md)}: 参照スキル '{token}' が存在しない"
                             "（実在しないなら Roadmap/未収録 を明記すること）"
                         )
 

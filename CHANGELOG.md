@@ -12,6 +12,7 @@
 - 公開リポジトリに漏出していた私的仕様 `slack-notification-spec.md` への参照を除去。
 - **プライバシー / 内部情報のスクラブ（GATE-3）**: 公開リポジトリに残っていた個人名 5 箇所を非個人化（「非エンジニアの関係者」等）、内部コードネーム 8 箇所を一般語（「主力プロダクト（LMS）」等）へ置換。
 - **未収録スキルへの宙ぶらりん参照 3 件**を修正（`scope-design` / `rollback-readiness` / `auth-boundary-check`）。実在しない forward-reference を `Roadmap: …、本リポジトリ未収録` と明示し、誤認を防止。
+- 残存ドリフト 2 件を修正: README 実装状態テーブルの Phase 2 が未収録の `lab-data-auth-ops` を「完了」と記載していた点、`rollback-plan` の `plugin/skill` 修飾形式（`lab-data-auth-ops/rollback-readiness`）の宙ぶらりん参照。あわせてスキル相互参照検査を `plugin/skill` 修飾形式にも対応させ、検証ギャップを解消。
 - README / `docs/architecture.md` / `CONTRIBUTING.md` の記述を実体（4 プラグイン / 27 スキル）に整合。未収録の `lab-strategy-design` / `lab-data-auth-ops` は Roadmap 節へ分離。
 - `skill-template.md` の frontmatter（`src` / `version`）を実スキル（`name` / `description`）に整合。
 

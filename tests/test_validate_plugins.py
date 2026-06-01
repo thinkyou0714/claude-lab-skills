@@ -280,3 +280,11 @@ def test_skill_ref_valid_ok(tmp_path):
     make_plugin(tmp_path, plugin="lab-test", skills={"foo": foo, "bar": bar})
     v = run_validator(tmp_path)
     assert not any("bar" in e and "存在しない" in e for e in v.errors)
+
+
+def test_skill_ref_qualified_dangling_errors(tmp_path):
+    # `plugin/skill` 修飾形式の宙ぶらりん参照も検出されること（R5 で塞いだギャップ）
+    md = make_skill_md(name="foo", extra="\n## 参照\n- `other-plugin/missing-skill` skill — x\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("other-plugin/missing-skill" in e for e in v.errors)
