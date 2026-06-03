@@ -34,13 +34,13 @@ Plugin      ─── 領域別パッケージ（例: lab-thinking-core）
 
 ---
 
-## Plugin 一覧（本リポジトリ収録: 6 プラグイン / 40 スキル）
+## Plugin 一覧（本リポジトリ収録: 6 プラグイン / 41 スキル）
 
 | Plugin | 責務 | Skill 数 | Command |
 |---|---|---|---|
 | [lab-thinking-core](./lab-thinking-core/) | 論点整理・前提検証・意思決定支援 | 8 | `/think` |
 | [lab-strategy-design](./lab-strategy-design/) | 目標検証・代替案比較・スコープ設計・価値/価格/差別化・戦略査定 | 7 | `/strategy` `/strategy-review` |
-| [lab-automation-architecture](./lab-automation-architecture/) | 自動化可否判断・フロー設計・障害設計 | 6 | `/automation-review` |
+| [lab-automation-architecture](./lab-automation-architecture/) | 自動化可否判断・フロー設計・障害設計 | 7 | `/automation-review` |
 | [lab-data-auth-ops](./lab-data-auth-ops/) | データ設計・認証境界・PII・監査ログ・アクセス制御 | 6 | `/data-review` |
 | [lab-implementation-flow](./lab-implementation-flow/) | 実装ゲート・影響範囲・施工AIへの handoff | 7 | `/impl-gate` |
 | [lab-communication-translation](./lab-communication-translation/) | 非エンジニア翻訳・ドキュメント再利用性・知識記録変換 | 6 | `/translate` |
