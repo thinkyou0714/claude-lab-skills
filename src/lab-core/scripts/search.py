@@ -106,7 +106,7 @@ def search_files(
                 "path": display_path(path, root),
                 "hits": file_hits,
             })
-            if max_results is not None and len(results) >= max_results:
+            if max_results is not None and max_results >= 1 and len(results) >= max_results:
                 break
 
     return results
@@ -176,6 +176,10 @@ def main() -> None:
 
     if args.context < 0:
         print("[エラー] --context は 0 以上で指定してください", file=sys.stderr)
+        sys.exit(1)
+
+    if args.max is not None and args.max < 1:
+        print("[エラー] --max は 1 以上で指定してください", file=sys.stderr)
         sys.exit(1)
 
     results = search_files(

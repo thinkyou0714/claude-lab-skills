@@ -71,7 +71,8 @@ FENCE_RE = re.compile(r"```.*?```", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 
 # スキル相互参照（`name` skill / `plugin/name` skill 形式）と Roadmap マーカー
-SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]*(?:/[a-z0-9-]+)*)`\s*skill")
+# skill の後ろは語境界（\b）を要求し、"skilled" / "skills" 等の誤マッチを防ぐ
+SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]*(?:/[a-z0-9-]+)*)`\s*skill\b")
 ROADMAP_MARKERS = ("Roadmap", "未収録")
 
 
@@ -107,14 +108,14 @@ def parse_frontmatter(content: str) -> dict:
 
 
 def extract_sections(content: str) -> set[str]:
-    """## セクション見出しを抽出する。"""
-    content = normalize_newlines(content)
+    """## セクション見出しを抽出する（コードフェンス内の見出しは無視）。"""
+    content = FENCE_RE.sub("", normalize_newlines(content))
     return {m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)}
 
 
 def extract_command_skill_refs(content: str) -> list[str]:
-    """command ファイルから '- skill-name: <path>' 形式のパスを抽出する。"""
-    content = normalize_newlines(content)
+    """command ファイルから '- skill-name: <path>' 形式のパスを抽出する（フェンス内は無視）。"""
+    content = FENCE_RE.sub("", normalize_newlines(content))
     return re.findall(r"^- \S+:\s+(\S+\.md)\s*$", content, re.MULTILINE)
 
 

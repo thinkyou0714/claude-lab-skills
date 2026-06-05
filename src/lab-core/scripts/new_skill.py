@@ -8,7 +8,9 @@ ADR-006 を参照）。生成するのは未着手の雛形のみで、既存フ
 
 使い方:
   python src/lab-core/scripts/new_skill.py <plugin> <skill-name>
-  python src/lab-core/scripts/new_skill.py lab-strategy-design my-new-skill --force
+
+既存の SKILL.md は決して上書きしない（手作りの内容を保護するため。ADR-006）。
+作り直したい場合は対象ファイルを手動で削除してから再実行する。
 
 生成後:
   - description を埋める（責務 + 使う場面のトリガーを含める）
@@ -132,7 +134,6 @@ def main() -> None:
     parser.add_argument("skill", help="スキル名（kebab-case）")
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[3],
                         help="リポジトリルート（デフォルト: 推定）")
-    parser.add_argument("--force", action="store_true", help="既存 SKILL.md を上書きする")
     args = parser.parse_args()
 
     if not SKILL_NAME_RE.match(args.skill):
@@ -145,8 +146,12 @@ def main() -> None:
         sys.exit(1)
 
     dest = plugin_dir / "skills" / args.skill / "SKILL.md"
-    if dest.exists() and not args.force:
-        print(f"[エラー] 既に存在します（--force で上書き）: {dest}", file=sys.stderr)
+    if dest.exists():
+        # 既存は決して上書きしない（手作りの Output Contract / Instructions を保護。ADR-006）
+        print(
+            f"[エラー] 既に存在するため生成しません（作り直すなら手動削除してから）: {dest}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     dest.parent.mkdir(parents=True, exist_ok=True)

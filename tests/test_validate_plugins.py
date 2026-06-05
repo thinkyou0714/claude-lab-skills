@@ -288,3 +288,34 @@ def test_skill_ref_qualified_dangling_errors(tmp_path):
     make_plugin(tmp_path, skills={"foo": md})
     v = run_validator(tmp_path)
     assert any("other-plugin/missing-skill" in e for e in v.errors)
+
+
+# --- フェンス処理の統一（コード抽出のバグ修正） -----------------------------
+
+def test_extract_sections_ignores_fenced_headings():
+    secs = vp.extract_sections("## Real\n\n```text\n## Fenced\n```\n\n## Real2\n")
+    assert "Real" in secs and "Real2" in secs
+    assert "Fenced" not in secs
+
+
+def test_section_inside_fence_does_not_satisfy_requirement(tmp_path):
+    # 必須セクションをフェンス内にだけ置いても「欠落」として検出されること（潜在バグの回帰）
+    body = [s for s in vp.REQUIRED_SECTIONS if s != "Guardrails"]
+    md = make_skill_md(name="foo", sections=body, extra="\n```text\n## Guardrails\n（fence 内）\n```\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("## Guardrails" in e for e in v.errors)
+
+
+def test_extract_command_refs_ignores_fenced():
+    text = "- real: ../../skills/real/SKILL.md\n```text\n- fenced: ../../skills/fenced/SKILL.md\n```\n"
+    refs = vp.extract_command_skill_refs(text)
+    assert "../../skills/real/SKILL.md" in refs
+    assert "../../skills/fenced/SKILL.md" not in refs
+
+
+def test_skill_ref_re_word_boundary():
+    assert vp.SKILL_REF_RE.search("`foo` skill —")
+    assert vp.SKILL_REF_RE.search("`foo` skill")
+    assert not vp.SKILL_REF_RE.search("`foo` skilled developer")
+    assert not vp.SKILL_REF_RE.search("`foo` skills are")
