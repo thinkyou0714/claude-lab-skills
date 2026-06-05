@@ -30,6 +30,18 @@
       "source": "./lab-communication-translation",
       "displayName": "Lab Communication Translation",
       "description": "非エンジニア翻訳・ドキュメント再利用性・知識記録変換（/translate）"
+    },
+    {
+      "name": "lab-strategy-design",
+      "source": "./lab-strategy-design",
+      "displayName": "Lab Strategy Design",
+      "description": "目標検証・代替案比較・スコープ設計・価値/価格/差別化・戦略査定（/strategy, /strategy-review）"
+    },
+    {
+      "name": "lab-data-auth-ops",
+      "source": "./lab-data-auth-ops",
+      "displayName": "Lab Data & Auth Ops",
+      "description": "データ設計・認証境界・PII・監査ログ・アクセス制御（/data-review）"
     }
   ]
 }

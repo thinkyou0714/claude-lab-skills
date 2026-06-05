@@ -1,5 +1,7 @@
 # lab-thinking-core
 
+> English: [README.en.md](./README.en.md)
+
 論点整理・前提検証・意思決定支援を行う思考コアプラグイン。
 曖昧な相談を判断材料へ分解し、**最終判断を人間が下せる状態**にする。
 

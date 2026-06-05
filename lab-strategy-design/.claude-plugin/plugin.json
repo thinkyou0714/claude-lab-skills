@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lab-strategy-design",
+  "displayName": "Lab Strategy Design",
+  "version": "1.0.0",
+  "description": "目標検証・代替案比較・スコープ設計・提供価値/価格/差別化・実行中戦略の査定を行う事業設計の Skill 群。",
+  "author": {
+    "name": "thinkyou0714"
+  },
+  "homepage": "https://github.com/thinkyou0714/claude-lab-skills",
+  "repository": "https://github.com/thinkyou0714/claude-lab-skills",
+  "license": "MIT",
+  "keywords": ["strategy", "business-design", "pricing", "positioning", "scope"],
+  "skills": "./skills/",
+  "commands": "./.claude/commands/"
+}

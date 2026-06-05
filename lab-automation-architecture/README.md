@@ -1,5 +1,7 @@
 # lab-automation-architecture
 
+> English: [README.en.md](./README.en.md)
+
 自動化の可否判断・フロー設計・障害設計を行うプラグイン。
 「自動化すべきか」「止まったら気づけるか」を、実装前に判断できる状態にする。
 

@@ -8,6 +8,10 @@
 
 ### Fixed（不具合修正）
 
+- **コードの入出力を堅牢化（エッジケース）**: BOM 付きファイルの frontmatter 解析（`utf-8-sig`）、存在しない `--root` のクラッシュをクリーンエラー化、タイトル付き / `<url>` 形式リンクの正規化、`skills/__pycache__`・隠しディレクトリの除外。
+- **コード抽出のフェンス処理を統一（根本原因修正）**: `extract_sections` / `extract_command_skill_refs` がコードフェンス内の見出し・参照を誤検出していた問題を修正（必須セクションがフェンス内にだけある場合に検証をすり抜ける潜在バグを解消）。`SKILL_REF_RE` に語境界を追加し "skilled" / "skills" の誤マッチを防止。`search.py --max` は 1 以上を要求するよう検証。
+- **`new_skill.py` の `--force` を廃止**（Codex 自動レビュー対応）: 既存 SKILL.md を決して上書きしないようにし、ADR-006（手作り内容の保護）の保証と整合させた。
+- `docs/TASKS.md` の DoD の古い数値（4プラグイン27スキル）を実体（6プラグイン40スキル）に是正。
 - モノレポ切り出し時に発生した内部リンク切れ **31 件** を解消（`docs/CONTEXT.md` / `DECISIONS.md` / `TASKS.md` への過剰な `../`、幻プラグインへのリンク）。
 - 公開リポジトリに漏出していた私的仕様 `slack-notification-spec.md` への参照を除去。
 - **プライバシー / 内部情報のスクラブ（GATE-3）**: 公開リポジトリに残っていた個人名 5 箇所を非個人化（「非エンジニアの関係者」等）、内部コードネーム 8 箇所を一般語（「主力プロダクト（LMS）」等）へ置換。
@@ -18,6 +22,11 @@
 
 ### Added（追加）
 
+- **mypy 型チェック**を CI ゲートに追加（`[tool.mypy]`、Python 3.9 基準、3スクリプト対象。`make typecheck` でも実行可）。
+- **Roadmap プラグインを本実装**: `lab-strategy-design`（7スキル, `/strategy` `/strategy-review`）と `lab-data-auth-ops`（6スキル, `/data-review`）を追加。収録は 4→6 プラグイン / 27→40 スキルに拡大。既存の forward-reference（`scope-design` / `auth-boundary-check` / `rollback-readiness`）を実体化し、Roadmap 明記を解除。
+- **国際化（i18n）**: 英語版 README（ルート + 全6プラグインの `README.en.md`）と `CONTRIBUTING.en.md` を追加し、日本語版と相互リンク。
+- **スキャフォルダ `src/lab-core/scripts/new_skill.py`**: テンプレートから新規スキルの雛形を生成（既存は上書きしない）。SKILL.md は手作りを正とし機械的な全文再生成はしない方針を **ADR-006** に記録。「SoT → SKILL」ループを安全な形（雛形生成 + 双方向リンク整合の検証）で実現。
+- **`src/` 領域別 Source of Truth 層を実体化**: `src/lab-strategy/`（`strategy-principles.md` / `positioning-reference.md`）と `src/lab-data-auth/`（`data-auth-principles.md` / `pii-classification.md`）を追加。スキルと双方向に参照リンクし、「SoT → SKILL」の依存を明示。
 - 欠落していた正本ドキュメントを作成: `docs/CONTEXT.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `src/lab-core/data/glossary.md`。
 - 各プラグインの `README.md`（×4、スキル表 + Command + インストール手順）。`validate_plugins.py` で plugin README の存在と command frontmatter（`description` / `allowed-tools`）も検査。
 - CI に pip キャッシュを追加。CONTRIBUTING の品質ゲートに「個人名・内部コードネームを含めない（GATE-3）」「plugin README 更新」を追加。

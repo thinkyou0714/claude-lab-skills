@@ -288,3 +288,67 @@ def test_skill_ref_qualified_dangling_errors(tmp_path):
     make_plugin(tmp_path, skills={"foo": md})
     v = run_validator(tmp_path)
     assert any("other-plugin/missing-skill" in e for e in v.errors)
+
+
+# --- フェンス処理の統一（コード抽出のバグ修正） -----------------------------
+
+def test_extract_sections_ignores_fenced_headings():
+    secs = vp.extract_sections("## Real\n\n```text\n## Fenced\n```\n\n## Real2\n")
+    assert "Real" in secs and "Real2" in secs
+    assert "Fenced" not in secs
+
+
+def test_section_inside_fence_does_not_satisfy_requirement(tmp_path):
+    # 必須セクションをフェンス内にだけ置いても「欠落」として検出されること（潜在バグの回帰）
+    body = [s for s in vp.REQUIRED_SECTIONS if s != "Guardrails"]
+    md = make_skill_md(name="foo", sections=body, extra="\n```text\n## Guardrails\n（fence 内）\n```\n")
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert any("## Guardrails" in e for e in v.errors)
+
+
+def test_extract_command_refs_ignores_fenced():
+    text = "- real: ../../skills/real/SKILL.md\n```text\n- fenced: ../../skills/fenced/SKILL.md\n```\n"
+    refs = vp.extract_command_skill_refs(text)
+    assert "../../skills/real/SKILL.md" in refs
+    assert "../../skills/fenced/SKILL.md" not in refs
+
+
+def test_skill_ref_re_word_boundary():
+    assert vp.SKILL_REF_RE.search("`foo` skill —")
+    assert vp.SKILL_REF_RE.search("`foo` skill")
+    assert not vp.SKILL_REF_RE.search("`foo` skilled developer")
+    assert not vp.SKILL_REF_RE.search("`foo` skills are")
+
+
+# --- 入出力の堅牢化（エッジケース修正） -------------------------------------
+
+def test_read_text_strips_bom(tmp_path):
+    p = tmp_path / "x.md"
+    p.write_bytes("﻿---\nname: foo\ndescription: \"x\"\n---\n".encode())
+    content = vp.read_text(p)
+    assert content is not None
+    assert vp.parse_frontmatter(content)["name"] == "foo"
+
+
+def test_nonexistent_root_no_crash(tmp_path):
+    v = vp.Validator(root=tmp_path / "does-not-exist", out=io.StringIO())
+    assert v.run() is False  # クラッシュせず False を返す
+
+
+def test_find_skill_dirs_skips_dunder_and_dot(tmp_path):
+    base = tmp_path / "lab-x" / "skills"
+    (base / "__pycache__").mkdir(parents=True)
+    (base / ".hidden").mkdir()
+    (base / "real").mkdir()
+    names = {d.name for d in vp.find_skill_dirs(tmp_path / "lab-x")}
+    assert "real" in names
+    assert "__pycache__" not in names and ".hidden" not in names
+
+
+def test_link_with_title_not_flagged(tmp_path):
+    # `[text](./SKILL.md "title")` のタイトル付きリンクを誤って壊れリンク扱いしない
+    md = make_skill_md(name="foo", extra='\n## 参照\n[self](./SKILL.md "title")\n')
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert not any("SKILL.md" in e and "存在しない" in e for e in v.errors)

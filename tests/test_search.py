@@ -61,6 +61,13 @@ def test_search_max_results(tmp_path):
     assert len(res) == 1
 
 
+def test_search_max_zero_means_unlimited(tmp_path):
+    # max_results=0/負値は「制限なし」として扱う（CLI 側では --max>=1 を要求）
+    _seed(tmp_path)
+    full = search.search_files(tmp_path, "world", [".md"], None)
+    assert search.search_files(tmp_path, "world", [".md"], None, max_results=0) == full
+
+
 def test_search_single_file_root(tmp_path):
     _seed(tmp_path)
     res = search.search_files(tmp_path / "a.md", "world", [".md"], None)

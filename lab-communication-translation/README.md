@@ -1,5 +1,7 @@
 # lab-communication-translation
 
+> English: [README.en.md](./README.en.md)
+
 非エンジニア翻訳・要約構造化・ドキュメント再利用性・他LLM移植性・知識記録変換を担うプラグイン。
 技術内容を「受け手に応じた形」へ変換し、判断と引き継ぎを滑らかにする。
 

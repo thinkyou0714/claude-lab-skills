@@ -103,5 +103,5 @@ description: "実装・デプロイ・マイグレーションが失敗した場
 - `implementation-gate` skill — 実装着手前のゲートチェック（ロールバック方針を要求）
 - `patch-readiness` skill — パッチ適用前のロールバック準備確認
 - `change-impact-scan` skill — 影響範囲の洗い出し（ロールバック対象の特定）
-- `lab-data-auth-ops/rollback-readiness` skill（Roadmap: 本リポジトリ未収録）— DB ロールバックの詳細確認
+- `lab-data-auth-ops/rollback-readiness` skill — DB ロールバックの詳細確認
 - [docs/CONTEXT.md](../../../docs/CONTEXT.md) — Vercel / Supabase のデプロイ環境
