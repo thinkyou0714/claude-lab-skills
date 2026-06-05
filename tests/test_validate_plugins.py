@@ -319,3 +319,36 @@ def test_skill_ref_re_word_boundary():
     assert vp.SKILL_REF_RE.search("`foo` skill")
     assert not vp.SKILL_REF_RE.search("`foo` skilled developer")
     assert not vp.SKILL_REF_RE.search("`foo` skills are")
+
+
+# --- 入出力の堅牢化（エッジケース修正） -------------------------------------
+
+def test_read_text_strips_bom(tmp_path):
+    p = tmp_path / "x.md"
+    p.write_bytes("﻿---\nname: foo\ndescription: \"x\"\n---\n".encode())
+    content = vp.read_text(p)
+    assert content is not None
+    assert vp.parse_frontmatter(content)["name"] == "foo"
+
+
+def test_nonexistent_root_no_crash(tmp_path):
+    v = vp.Validator(root=tmp_path / "does-not-exist", out=io.StringIO())
+    assert v.run() is False  # クラッシュせず False を返す
+
+
+def test_find_skill_dirs_skips_dunder_and_dot(tmp_path):
+    base = tmp_path / "lab-x" / "skills"
+    (base / "__pycache__").mkdir(parents=True)
+    (base / ".hidden").mkdir()
+    (base / "real").mkdir()
+    names = {d.name for d in vp.find_skill_dirs(tmp_path / "lab-x")}
+    assert "real" in names
+    assert "__pycache__" not in names and ".hidden" not in names
+
+
+def test_link_with_title_not_flagged(tmp_path):
+    # `[text](./SKILL.md "title")` のタイトル付きリンクを誤って壊れリンク扱いしない
+    md = make_skill_md(name="foo", extra='\n## 参照\n[self](./SKILL.md "title")\n')
+    make_plugin(tmp_path, skills={"foo": md})
+    v = run_validator(tmp_path)
+    assert not any("SKILL.md" in e and "存在しない" in e for e in v.errors)

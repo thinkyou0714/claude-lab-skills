@@ -10,7 +10,7 @@ license = { file = "LICENSE" }
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "ruff>=0.4"]
+dev = ["pytest>=7.0", "ruff>=0.4", "mypy>=1.0", "codespell>=2.0"]
 
 [tool.ruff]
 line-length = 120
@@ -27,3 +27,13 @@ ignore = [
 pythonpath = [".", "src/lab-core/scripts"]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.mypy]
+# 解析対象の構文水準（実行時の 3.9 互換は CI の pytest マトリクスで担保）
+python_version = "3.10"
+ignore_missing_imports = true
+files = [
+    "validate_plugins.py",
+    "src/lab-core/scripts/search.py",
+    "src/lab-core/scripts/new_skill.py",
+]

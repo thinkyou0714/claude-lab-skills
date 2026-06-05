@@ -85,7 +85,7 @@ def search_files(
             continue
 
         try:
-            lines = path.read_text(encoding="utf-8").splitlines()
+            lines = path.read_text(encoding="utf-8-sig").splitlines()
         except (UnicodeDecodeError, PermissionError, OSError):
             continue
 

@@ -149,7 +149,11 @@ def find_skill_dirs(plugin: Path) -> list[Path]:
     skills_dir = plugin / "skills"
     if not skills_dir.exists():
         return []
-    return sorted(d for d in skills_dir.iterdir() if d.is_dir())
+    # __pycache__ や隠しディレクトリはスキルとして扱わない
+    return sorted(
+        d for d in skills_dir.iterdir()
+        if d.is_dir() and not d.name.startswith((".", "__"))
+    )
 
 
 def find_command_files(plugin: Path) -> list[Path]:
@@ -160,9 +164,9 @@ def find_command_files(plugin: Path) -> list[Path]:
 
 
 def read_text(path: Path) -> str | None:
-    """UTF-8 として読む。失敗したら None。"""
+    """UTF-8（BOM 許容）として読む。失敗したら None。"""
     try:
-        return path.read_text(encoding="utf-8")
+        return path.read_text(encoding="utf-8-sig")
     except (UnicodeDecodeError, OSError):
         return None
 
@@ -319,7 +323,13 @@ class Validator:
                 continue
             for target in extract_md_links(content):
                 t = target.strip()
-                if t.startswith(("http://", "https://", "mailto:", "#")):
+                # <url> 形式、および `url "title"` のタイトル付き形式を正規化する
+                if t.startswith("<") and ">" in t:
+                    t = t[1:t.index(">")].strip()
+                else:
+                    parts = t.split(None, 1)
+                    t = parts[0] if parts else ""
+                if not t or t.startswith(("http://", "https://", "mailto:", "#")):
                     continue
                 path_part = t.split("#", 1)[0].strip()
                 if not path_part:
@@ -420,6 +430,9 @@ class Validator:
                 self.err(f"{plugin.name}: marketplace.json の plugins に未登録")
 
     def run(self) -> bool:
+        if not self.root.is_dir():
+            print(f"[ERROR] ルートディレクトリが存在しません: {self.root}", file=self.out)
+            return False
         plugins = find_plugins(self.root)
         if not plugins:
             print(
