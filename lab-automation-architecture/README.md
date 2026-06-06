@@ -9,7 +9,7 @@
 
 - [`/automation-review`](./.claude/commands/automation-review.md) — `automation-feasibility` から `monitoring-alert-design` まで、必要な Skill を順に適用する
 
-## Skills（6）
+## Skills（7）
 
 | Skill | 責務 |
 |---|---|
@@ -19,6 +19,7 @@
 | [`failure-point-review`](./skills/failure-point-review/SKILL.md) | 障害点を体系的に列挙し、影響度・検知可能性・対応方針を整理する |
 | [`retry-idempotency-check`](./skills/retry-idempotency-check/SKILL.md) | リトライ設計とべき等性を確認し、二重実行による破損を防ぐ |
 | [`monitoring-alert-design`](./skills/monitoring-alert-design/SKILL.md) | 監視項目・アラート条件・通知先・初動手順を設計する |
+| [`agmsg`](./skills/agmsg/SKILL.md) | Claude Code ↔ Codex を共有 SQLite メールボックスで直接メッセージ連携させ、AI間コピペ往復を消す (upstream: fujibee/agmsg, MIT) |
 
 ## インストール
 

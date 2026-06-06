@@ -27,6 +27,7 @@
 - **国際化（i18n）**: 英語版 README（ルート + 全6プラグインの `README.en.md`）と `CONTRIBUTING.en.md` を追加し、日本語版と相互リンク。
 - **スキャフォルダ `src/lab-core/scripts/new_skill.py`**: テンプレートから新規スキルの雛形を生成（既存は上書きしない）。SKILL.md は手作りを正とし機械的な全文再生成はしない方針を **ADR-006** に記録。「SoT → SKILL」ループを安全な形（雛形生成 + 双方向リンク整合の検証）で実現。
 - **`src/` 領域別 Source of Truth 層を実体化**: `src/lab-strategy/`（`strategy-principles.md` / `positioning-reference.md`）と `src/lab-data-auth/`（`data-auth-principles.md` / `pii-classification.md`）を追加。スキルと双方向に参照リンクし、「SoT → SKILL」の依存を明示。
+- **`agmsg` スキル**を `lab-automation-architecture` に追加（自動化プラグインは 6 → 7 スキル、リポジトリ合計 40 → 41 スキル）。Claude Code ↔ Codex を共有 SQLite メールボックスで直接メッセージ連携させ、AI 間のコピペ往復を消す導入・運用 skill（upstream: [fujibee/agmsg](https://github.com/fujibee/agmsg), MIT）。
 - 欠落していた正本ドキュメントを作成: `docs/CONTEXT.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, `src/lab-core/data/glossary.md`。
 - 各プラグインの `README.md`（×4、スキル表 + Command + インストール手順）。`validate_plugins.py` で plugin README の存在と command frontmatter（`description` / `allowed-tools`）も検査。
 - CI に pip キャッシュを追加。CONTRIBUTING の品質ゲートに「個人名・内部コードネームを含めない（GATE-3）」「plugin README 更新」を追加。
