@@ -31,10 +31,10 @@ test:
 	$(PYTHON) -m pytest
 
 lint-md:
-	npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+	npx --yes markdownlint-cli2@0.14.0 "**/*.md" "#node_modules"
 
 fmt-md:
-	npx --yes markdownlint-cli2 --fix "**/*.md" "#node_modules"
+	npx --yes markdownlint-cli2@0.14.0 --fix "**/*.md" "#node_modules"
 
 spell:
 	codespell

@@ -33,7 +33,7 @@ repos:
     hooks:
       - id: validate-plugins
         name: validate lab-skills plugins (strict + links)
-        entry: python validate_plugins.py --strict
+        entry: python3 validate_plugins.py --strict
         language: system
         pass_filenames: false
         files: \.(md|py)$
