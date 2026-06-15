@@ -43,88 +43,31 @@ REQUIRED_SECTIONS = [
     "Further Reading",
 ]
 
-TEMPLATE = """---
-name: {name}
-description: "（1〜2文で責務を説明。使う場面のトリガーを含めること）"
----
+# 雛形の正本（テンプレート本文）はこのファイルではなく
+# src/lab-core/templates/skill-template.md の ```markdown フェンス内に置く。
+# 生成スクリプトとドキュメントの二重管理を避けるため（ADR-006 / ADR-007）。
+TEMPLATE_PATH = Path(__file__).resolve().parent.parent / "templates" / "skill-template.md"
 
-## Purpose
+# テンプレート内の skill 名プレースホルダ（frontmatter の name 行のみ置換する）
+_NAME_PLACEHOLDER_RE = re.compile(r"^name:\s*<skill-name>\s*$", re.MULTILINE)
+_TEMPLATE_FENCE_RE = re.compile(r"```markdown\n(.*?)\n```", re.DOTALL)
 
-（このスキルが解決する問題を1〜2文で。「〜のリスクを防ぐ」「〜を判断できる状態にする」）
 
-## Use When
-
-- （使う場面・具体的なトリガー）
-
-## Inputs
-
-以下を準備すること。不足している場合は推測せず、不足を明示する。
-
-- **（必須項目）**: （説明）
-
-## Output Contract
-
-以下の順で出力すること。順序を変えない。
-
-1. **論点**: （）
-2. **根拠**: その論点をそう判断した理由
-3. **判断材料**: 次のアクションを選ぶために人間が確認すべき情報
-
-## Review Lens
-
-- **目的妥当性**: （）
-- **範囲の過不足**: （）
-- **中長期リスク**: （）
-- **LAB全体との整合性**: LMS / 自動化 / B2B 展開と整合しているか
-- **非エンジニア理解可能性**: 非エンジニアの関係者に説明できるか
-- **他LLM移植耐性**: Claude 固有の解釈に依存していないか
-
-## Instructions
-
-1. （ステップ）
-2. 不明な前提は推測せず、仮定を明示する
-
-## Guardrails
-
-- 推測で仕様を埋めない。前提が不明な場合は明示する
-- 選択肢を1つに閉じない
-- コスト比較を省略しない
-- 最終判断は人間に委ねる
-
-## LAB Cross-Check
-
-| 観点 | 状態 | 備考 |
-|---|---|---|
-| 自動化フロー | — | （） |
-| データ / 認証 / ログ | — | （） |
-| 実装 / 運用フロー | — | （） |
-| 非エンジニア理解可能性 | — | （） |
-| 会員共有 / 再利用耐性 | — | （） |
-| 他LLM移植耐性 | — | （） |
-
-状態は OK / 注意 / NG / 対象外 で記入すること。
-
-## Handoff Notes
-
-施工AI（Claude Code / Cursor 等）へ渡す前に以下を確定させること。
-
-- **要件**: （）
-- **成功条件**: （）
-- **失敗条件**: （）
-- **実行範囲**: （）
-- **影響範囲**: （）
-- **ロールバック方針**: （）
-- **コスト比較**: （）
-
-## Further Reading
-
-- （関連スキル / src の正本へのリンク）
-"""
+def load_template() -> str:
+    """skill-template.md の ```markdown フェンス内の雛形本文を取り出す。"""
+    text = TEMPLATE_PATH.read_text(encoding="utf-8")
+    match = _TEMPLATE_FENCE_RE.search(text)
+    if not match:
+        raise RuntimeError(
+            f"テンプレート本文（```markdown フェンス）が見つかりません: {TEMPLATE_PATH}"
+        )
+    return match.group(1).rstrip() + "\n"
 
 
 def build_skill(name: str) -> str:
-    """skill 名から SKILL.md の雛形テキストを生成する。"""
-    return TEMPLATE.format(name=name)
+    """skill 名から SKILL.md の雛形テキストを生成する（正本: skill-template.md）。"""
+    template = load_template()
+    return _NAME_PLACEHOLDER_RE.sub(f"name: {name}", template, count=1)
 
 
 def main() -> None:

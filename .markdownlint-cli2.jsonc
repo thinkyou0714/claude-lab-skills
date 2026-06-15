@@ -12,6 +12,10 @@
     "MD036": false, // emphasis-as-heading: 強調を見出し代わりに使う箇所を許容
     "MD060": false, // table-column-style: テーブルのパイプ前後スペースは強制しない
 
+    // CHANGELOG は Keep a Changelog 形式でリリースごとに Added/Changed/Fixed が繰り返される。
+    // 同一見出しは兄弟（同じ親）内のみ重複禁止とし、リリース間の正当な再掲は許容する。
+    "MD024": { "siblings_only": true },
+
     // 有効（意味のある構造ルール。--fix で整形）
     "MD040": true,  // コードフェンスは言語指定する
     "MD032": true,  // リストの前後に空行

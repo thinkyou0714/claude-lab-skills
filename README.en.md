@@ -33,13 +33,13 @@ Plugin      --- Domain package (e.g. lab-thinking-core)
 - **1 Skill = 1 responsibility**; cross-plugin references are minimized.
 - **Never fill specs by guessing**: when inputs are missing, say so explicitly.
 
-## Plugins (6 plugins / 40 skills)
+## Plugins (6 plugins / 41 skills)
 
 | Plugin | Responsibility | Skills | Command |
 |---|---|---|---|
 | [lab-thinking-core](./lab-thinking-core/) | Issue framing, assumption audit, decision support | 8 | `/think` |
 | [lab-strategy-design](./lab-strategy-design/) | Goal validation, alternatives, scope, value/pricing/differentiation, assessment | 7 | `/strategy` `/strategy-review` |
-| [lab-automation-architecture](./lab-automation-architecture/) | Automation feasibility, flow & failure design | 6 | `/automation-review` |
+| [lab-automation-architecture](./lab-automation-architecture/) | Automation feasibility, flow & failure design | 7 | `/automation-review` |
 | [lab-data-auth-ops](./lab-data-auth-ops/) | Data modeling, auth boundary, PII, audit log, access control | 6 | `/data-review` |
 | [lab-implementation-flow](./lab-implementation-flow/) | Implementation gate, impact scan, handoff | 7 | `/impl-gate` |
 | [lab-communication-translation](./lab-communication-translation/) | Non-engineer translation, doc reuse, knowledge capture | 6 | `/translate` |
@@ -59,7 +59,7 @@ You can also reference any `SKILL.md` directly, or copy a command from
 
 ## Source of Truth (`src/`)
 
-- `src/lab-core/` — shared基盤 (glossary, judgment gates, anti-patterns, cost comparison)
+- `src/lab-core/` — shared foundation (glossary, judgment gates, anti-patterns, cost comparison)
 - `src/lab-strategy/` — strategy design principles & references
 - `src/lab-data-auth/` — data & auth design principles, PII classification
 
@@ -73,7 +73,7 @@ python src/lab-core/scripts/search.py "judgment gate"
 
 Every change is verified by `validate_plugins.py --strict` (schema, internal links, skill
 cross-references, naming, manifests) plus `pytest`, `ruff`, `markdownlint`, and `codespell`,
-run on CI across Python 3.9–3.12. See [CONTRIBUTING.md](./CONTRIBUTING.md).
+run on CI across Python 3.9–3.14. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Related docs
 

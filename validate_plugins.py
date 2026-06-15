@@ -17,6 +17,7 @@ validate_plugins.py — lab-skills 整合性検証スクリプト
  12. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
  13. SKILL.md の '`name` skill' 参照が実在する（未収録なら Roadmap 明記を要求）
  14. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
+ 15. README の「N プラグイン / M スキル」の数値が実体と一致する（数値ドリフト検出）
 
 使い方:
   python validate_plugins.py [--root <lab-skills のパス>] [--verbose]
@@ -74,6 +75,15 @@ INLINE_CODE_RE = re.compile(r"`[^`]*`")
 # skill の後ろは語境界（\b）を要求し、"skilled" / "skills" 等の誤マッチを防ぐ
 SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]*(?:/[a-z0-9-]+)*)`\s*skill\b")
 ROADMAP_MARKERS = ("Roadmap", "未収録")
+
+# README の「N プラグイン / M スキル」表記（日本語・英語）を検出する。
+# 数値ドリフト（実体と乖離した手書きカウント）を検出するために使う。
+README_COUNT_RES = (
+    re.compile(r"(\d+)\s*プラグイン\s*/\s*(\d+)\s*スキル"),
+    re.compile(r"(\d+)\s*plugins?\s*/\s*(\d+)\s*skills?", re.IGNORECASE),
+)
+# カウント検査の対象 README（リポジトリルート直下）
+README_FILES = ("README.md", "README.en.md")
 
 
 def normalize_newlines(content: str) -> str:
@@ -429,6 +439,39 @@ class Validator:
             if market.exists() and plugin.name not in listed_names:
                 self.err(f"{plugin.name}: marketplace.json の plugins に未登録")
 
+    def validate_readme_counts(self, plugins: list[Path]) -> None:
+        """README の「N プラグイン / M スキル」が実体と一致するか検査する。
+
+        手書きのカウントは実体から乖離しやすい（ドリフト）。プラグイン数・スキル総数を
+        実体から数え、README 内の表記と突き合わせる。コードフェンス内は無視する。
+        """
+        print("\nカウント整合性チェック: README の「N プラグイン / M スキル」", file=self.out)
+        actual_plugins = len(plugins)
+        actual_skills = sum(len(find_skill_dirs(p)) for p in plugins)
+        for fname in README_FILES:
+            md = self.root / fname
+            if not md.exists():
+                continue
+            content = read_text(md)
+            if content is None:
+                self.err(f"{fname}: UTF-8 として読み込めない")
+                continue
+            content = FENCE_RE.sub("", normalize_newlines(content))
+            found = False
+            for pattern in README_COUNT_RES:
+                for m in pattern.finditer(content):
+                    found = True
+                    p_count, s_count = int(m.group(1)), int(m.group(2))
+                    if p_count != actual_plugins or s_count != actual_skills:
+                        self.err(
+                            f"{fname}: カウント '{m.group(0)}' が実体と不一致"
+                            f"（実体: {actual_plugins} プラグイン / {actual_skills} スキル）"
+                        )
+                    else:
+                        self.ok(f"{fname}: カウント '{m.group(0)}'")
+            if not found:
+                self.warn(f"{fname}: 「N プラグイン / M スキル」表記が見つからない")
+
     def run(self) -> bool:
         if not self.root.is_dir():
             print(f"[ERROR] ルートディレクトリが存在しません: {self.root}", file=self.out)
@@ -452,6 +495,7 @@ class Validator:
 
         self.validate_skill_refs(plugins)
         self.validate_manifests(plugins)
+        self.validate_readme_counts(plugins)
 
         # 結果サマリー
         print(f"\n{'=' * 60}", file=self.out)

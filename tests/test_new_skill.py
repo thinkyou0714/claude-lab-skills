@@ -28,6 +28,17 @@ def test_required_sections_match_validator():
     assert new_skill.REQUIRED_SECTIONS == vp.REQUIRED_SECTIONS
 
 
+def test_template_file_is_single_source(tmp_path):
+    # 雛形本文は skill-template.md の markdown フェンスから読まれる（二重管理しない）
+    template = new_skill.load_template()
+    sections = vp.extract_sections(template)
+    for s in vp.REQUIRED_SECTIONS:
+        assert s in sections, f"テンプレート正本に欠落: {s}"
+    # build_skill は frontmatter の name のみ差し替える
+    assert "name: foo-bar" in new_skill.build_skill("foo-bar")
+    assert "<skill-name>" not in vp.parse_frontmatter(new_skill.build_skill("foo-bar")).get("name", "")
+
+
 def test_invalid_name_rejected():
     assert not new_skill.SKILL_NAME_RE.match("Foo_Bar")
     assert not new_skill.SKILL_NAME_RE.match("foo bar")

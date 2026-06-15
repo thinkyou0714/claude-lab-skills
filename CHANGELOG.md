@@ -8,6 +8,9 @@
 
 ### Fixed（不具合修正）
 
+- **README / docs のカウントドリフトを是正**: `agmsg` 追加（40→41）が未反映だった `README.md`（実装状態・導入可能プラグイン一覧）/ `README.en.md`（合計・automation の 6→7・CI Python 3.9–3.14）/ `docs/CONTEXT.md`（合計・automation・SoT 収録状況）/ `docs/TASKS.md` を実体（6 プラグイン / 41 スキル）に統一。`docs/architecture.md` の「3層 / 4層」表記の食い違いを補足で明示。
+- **カウント整合チェックを `validate_plugins.py` に追加**: README の「N プラグイン / M スキル」表記を実体（プラグイン数・スキル総数）と突き合わせ、数値ドリフトを CI で検出（日本語・英語表記対応、コードフェンス内は除外）。
+
 - **コードの入出力を堅牢化（エッジケース）**: BOM 付きファイルの frontmatter 解析（`utf-8-sig`）、存在しない `--root` のクラッシュをクリーンエラー化、タイトル付き / `<url>` 形式リンクの正規化、`skills/__pycache__`・隠しディレクトリの除外。
 - **コード抽出のフェンス処理を統一（根本原因修正）**: `extract_sections` / `extract_command_skill_refs` がコードフェンス内の見出し・参照を誤検出していた問題を修正（必須セクションがフェンス内にだけある場合に検証をすり抜ける潜在バグを解消）。`SKILL_REF_RE` に語境界を追加し "skilled" / "skills" の誤マッチを防止。`search.py --max` は 1 以上を要求するよう検証。
 - **`new_skill.py` の `--force` を廃止**（Codex 自動レビュー対応）: 既存 SKILL.md を決して上書きしないようにし、ADR-006（手作り内容の保護）の保証と整合させた。
@@ -41,6 +44,7 @@
 
 ### Changed（変更）
 
+- **雛形テンプレートを単一正本化（重複解消）**: `src/lab-core/templates/skill-template.md` と `new_skill.py` に分裂していた雛形を、`skill-template.md` の ```markdown フェンス1か所に集約。`new_skill.py` はそれを読み取り frontmatter の `name` のみ差し替える（全文再生成はしない / ADR-006 踏襲）。判断は **ADR-007** に記録。
 - `.gitignore` を LF 化し、`.pytest_cache` / `.ruff_cache` / `node_modules` 等を追加。
 - **スキル description の発見性最適化**: トリガー句（「〜のとき/前に使う」）が無かった 14 スキルの `description` に簡潔な利用トリガーを追記し、AI のスキル自動選択での発見性を改善（意味は不変）。
 - 全 Markdown を markdownlint 基準で整形（コードフェンス言語付与・空行整形）。

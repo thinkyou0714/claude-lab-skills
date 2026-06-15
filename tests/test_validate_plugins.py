@@ -352,3 +352,41 @@ def test_link_with_title_not_flagged(tmp_path):
     make_plugin(tmp_path, skills={"foo": md})
     v = run_validator(tmp_path)
     assert not any("SKILL.md" in e and "存在しない" in e for e in v.errors)
+
+
+# --- README カウント整合性チェック ------------------------------------------
+
+def _write_readme(root: Path, text: str, fname="README.md"):
+    (root / fname).write_text(text, encoding="utf-8")
+
+
+def test_readme_count_matches_actual(tmp_path):
+    # 実体（1 プラグイン / 1 スキル）と一致する README はエラーを出さない
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(tmp_path, "# t\n\n本リポジトリ収録: 1 プラグイン / 1 スキル\n")
+    v = run_validator(tmp_path)
+    assert not any("カウント" in e for e in v.errors)
+
+
+def test_readme_count_drift_flagged(tmp_path):
+    # 実体（1/1）と乖離した手書きカウント（6 プラグイン / 40 スキル）はエラー
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(tmp_path, "# t\n\n収録: 6 プラグイン / 40 スキル\n")
+    v = run_validator(tmp_path)
+    assert any("カウント" in e and "不一致" in e for e in v.errors)
+
+
+def test_readme_count_english_pattern(tmp_path):
+    # 英語表記（plugins / skills）も検出する
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(tmp_path, "# t\n\n6 plugins / 40 skills\n", fname="README.en.md")
+    v = run_validator(tmp_path)
+    assert any("README.en.md" in e and "不一致" in e for e in v.errors)
+
+
+def test_readme_count_ignores_code_fence(tmp_path):
+    # コードフェンス内の「N プラグイン / M スキル」はカウント検査の対象外
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(tmp_path, "# t\n\n```text\n6 プラグイン / 40 スキル\n```\n")
+    v = run_validator(tmp_path)
+    assert not any("カウント" in e for e in v.errors)
