@@ -17,6 +17,7 @@ validate_plugins.py — lab-skills 整合性検証スクリプト
  12. リポジトリ内の全 .md の相対リンクが解決でき、リポジトリ外を指さない
  13. SKILL.md の '`name` skill' 参照が実在する（未収録なら Roadmap 明記を要求）
  14. .claude-plugin マニフェスト（marketplace.json / plugin.json）が整合している
+ 15. README の「N プラグイン / M スキル」の数値が実体と一致する（数値ドリフト検出）
 
 使い方:
   python validate_plugins.py [--root <lab-skills のパス>] [--verbose]
@@ -34,6 +35,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any, TextIO
 
 VERSION = "1.0.0"
 
@@ -60,8 +62,8 @@ SKIP_DIRS = {".git", "__pycache__", ".claude", "src", "node_modules"}
 # リンク検査時にスキップするディレクトリ名（VCS・キャッシュのみ）
 LINK_SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache"}
 
-# skill name の許容形式（kebab-case）と長さ上限
-SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+# skill name の許容形式（kebab-case・先頭は英字）と長さ上限
+SKILL_NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 MAX_NAME_LEN = 64
 MAX_DESC_LEN = 1024
 
@@ -75,13 +77,31 @@ INLINE_CODE_RE = re.compile(r"`[^`]*`")
 SKILL_REF_RE = re.compile(r"`([a-z][a-z0-9-]*(?:/[a-z0-9-]+)*)`\s*skill\b")
 ROADMAP_MARKERS = ("Roadmap", "未収録")
 
+# README の「N プラグイン / M スキル」表記（日本語・英語）を検出する。
+# 数値ドリフト（実体と乖離した手書きカウント）を検出するために使う。
+README_COUNT_RES = (
+    re.compile(r"(\d+)\s*プラグイン\s*/\s*(\d+)\s*スキル"),
+    re.compile(r"(\d+)\s*plugins?\s*/\s*(\d+)\s*skills?", re.IGNORECASE),
+)
+# カウント検査の対象 README（リポジトリルート直下）
+README_FILES = ("README.md", "README.en.md")
+
+# plugin.json / marketplace の version は SemVer（MAJOR.MINOR.PATCH）を要求する
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+# Markdown テーブル行から「bare 整数」セルを抽出する（スキル数カラムの検出に使う）
+TABLE_INT_CELL_RE = re.compile(r"^\d+$")
+
+# プラグイン README の「Skills (N)」/「Skills（N）」見出し（半角・全角括弧の両対応）
+PLUGIN_SKILLS_HEADER_RE = re.compile(r"Skills?\s*[（(](\d+)[）)]")
+
 
 def normalize_newlines(content: str) -> str:
     """CRLF / CR を LF に正規化する。"""
     return content.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def parse_frontmatter(content: str) -> dict:
+def parse_frontmatter(content: str) -> dict[str, str]:
     """--- ... --- ブロックから key: value を抽出する（簡易パーサー）。
 
     - CRLF 耐性あり
@@ -100,17 +120,37 @@ def parse_frontmatter(content: str) -> dict:
             continue
         if ":" in line:
             key, _, value = line.partition(":")
+            key = key.strip()
+            if not key:
+                continue
             value = value.strip()
             if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
                 value = value[1:-1]
-            result[key.strip()] = value
+            result[key] = value
     return result
 
 
 def extract_sections(content: str) -> set[str]:
     """## セクション見出しを抽出する（コードフェンス内の見出しは無視）。"""
+    return set(extract_section_list(content))
+
+
+def extract_section_list(content: str) -> list[str]:
+    """## セクション見出しを出現順で抽出する（コードフェンス内の見出しは無視）。"""
     content = FENCE_RE.sub("", normalize_newlines(content))
-    return {m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)}
+    return [m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)]
+
+
+def extract_section_bodies(content: str) -> dict[str, str]:
+    """## 見出しごとの本文（次の見出しまで）を返す（コードフェンス内の見出しは無視）。"""
+    content = FENCE_RE.sub("", normalize_newlines(content))
+    bodies: dict[str, str] = {}
+    matches = list(re.finditer(r"^## (.+)$", content, re.MULTILINE))
+    for i, m in enumerate(matches):
+        start = m.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+        bodies[m.group(1).strip()] = content[start:end].strip()
+    return bodies
 
 
 def extract_command_skill_refs(content: str) -> list[str]:
@@ -178,8 +218,8 @@ class Validator:
         verbose: bool = False,
         strict: bool = False,
         check_links: bool = True,
-        out=None,
-    ):
+        out: TextIO | None = None,
+    ) -> None:
         self.root = root
         self.verbose = verbose
         self.strict = strict
@@ -260,6 +300,29 @@ class Validator:
                 self.err(f"{rel}: 必須セクション '## {required}' がない")
             else:
                 self.ok(f"{rel}: ## {required}")
+
+        # 8b. 必須セクションの順序確認（テンプレートの「順序を変えない」を担保）
+        # 重複を除いた初出順で、必須セクションだけを取り出す
+        seen: set[str] = set()
+        present_order: list[str] = []
+        for s in extract_section_list(content):
+            if s in REQUIRED_SECTIONS and s not in seen:
+                seen.add(s)
+                present_order.append(s)
+        expected_order = [s for s in REQUIRED_SECTIONS if s in present_order]
+        if present_order != expected_order:
+            self.err(
+                f"{rel}: 必須セクションの順序がテンプレートと不一致"
+                f"（期待: {expected_order} / 実際: {present_order}）"
+            )
+        else:
+            self.ok(f"{rel}: セクション順序")
+
+        # 8c. 必須セクションの本文が空でないこと
+        bodies = extract_section_bodies(content)
+        for required in REQUIRED_SECTIONS:
+            if required in bodies and not bodies[required]:
+                self.err(f"{rel}: 必須セクション '## {required}' の本文が空")
 
     def validate_command(self, command_file: Path) -> None:
         content = read_text(command_file)
@@ -374,7 +437,7 @@ class Validator:
                             "（実在しないなら Roadmap/未収録 を明記すること）"
                         )
 
-    def _load_json(self, path: Path):
+    def _load_json(self, path: Path) -> Any:
         try:
             return json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
@@ -386,6 +449,7 @@ class Validator:
         print("\nマニフェスト検査: .claude-plugin/", file=self.out)
 
         listed_names: set[str] = set()
+        market_version: str | None = None
         market = self.root / ".claude-plugin" / "marketplace.json"
         if not market.exists():
             self.warn(".claude-plugin/marketplace.json が存在しない")
@@ -394,6 +458,11 @@ class Validator:
             if isinstance(data, dict):
                 if not data.get("name"):
                     self.err(f"{self.rel(market)}: name がない")
+                mv = data.get("version")
+                if mv and SEMVER_RE.match(str(mv)):
+                    market_version = str(mv)
+                elif mv:
+                    self.err(f"{self.rel(market)}: version '{mv}' が SemVer ではない")
                 owner = data.get("owner")
                 if not isinstance(owner, dict) or not owner.get("name"):
                     self.err(f"{self.rel(market)}: owner.name がない")
@@ -426,8 +495,126 @@ class Validator:
                         )
                     else:
                         self.ok(f"{self.rel(pj)}: name 一致")
+
+                    # version: SemVer（MAJOR.MINOR.PATCH）を要求する
+                    version = data.get("version")
+                    if not version:
+                        self.err(f"{self.rel(pj)}: version がない")
+                    elif not SEMVER_RE.match(str(version)):
+                        self.err(f"{self.rel(pj)}: version '{version}' が SemVer ではない")
+                    elif market_version is not None and str(version) != market_version:
+                        # 単一バージョン方針（ADR-010）: plugin.json は marketplace.json と一致させる
+                        self.err(
+                            f"{self.rel(pj)}: version '{version}' が "
+                            f"marketplace.json の '{market_version}' と不一致"
+                        )
+                    else:
+                        self.ok(f"{self.rel(pj)}: version {version}")
+
+                    # description: 非空・長すぎないこと
+                    desc = data.get("description")
+                    if not desc:
+                        self.err(f"{self.rel(pj)}: description がない")
+                    elif len(str(desc)) > MAX_DESC_LEN:
+                        self.warn(f"{self.rel(pj)}: description が長い（> {MAX_DESC_LEN} 文字）")
+                    else:
+                        self.ok(f"{self.rel(pj)}: description")
+
+                    # keywords: 推奨（発見性向上）。無ければ警告
+                    if not data.get("keywords"):
+                        self.warn(f"{self.rel(pj)}: keywords がない（発見性のため推奨）")
             if market.exists() and plugin.name not in listed_names:
                 self.err(f"{plugin.name}: marketplace.json の plugins に未登録")
+
+    def validate_readme_counts(self, plugins: list[Path]) -> None:
+        """README の「N プラグイン / M スキル」が実体と一致するか検査する。
+
+        手書きのカウントは実体から乖離しやすい（ドリフト）。プラグイン数・スキル総数を
+        実体から数え、README 内の表記と突き合わせる。コードフェンス内は無視する。
+        """
+        print("\nカウント整合性チェック: README の「N プラグイン / M スキル」", file=self.out)
+        actual_plugins = len(plugins)
+        actual_skills = sum(len(find_skill_dirs(p)) for p in plugins)
+        for fname in README_FILES:
+            md = self.root / fname
+            if not md.exists():
+                continue
+            content = read_text(md)
+            if content is None:
+                self.err(f"{fname}: UTF-8 として読み込めない")
+                continue
+            content = FENCE_RE.sub("", normalize_newlines(content))
+            found = False
+            for pattern in README_COUNT_RES:
+                for m in pattern.finditer(content):
+                    found = True
+                    p_count, s_count = int(m.group(1)), int(m.group(2))
+                    if p_count != actual_plugins or s_count != actual_skills:
+                        self.err(
+                            f"{fname}: カウント '{m.group(0)}' が実体と不一致"
+                            f"（実体: {actual_plugins} プラグイン / {actual_skills} スキル）"
+                        )
+                    else:
+                        self.ok(f"{fname}: カウント '{m.group(0)}'")
+            if not found:
+                self.warn(f"{fname}: 「N プラグイン / M スキル」表記が見つからない")
+
+        self.validate_per_plugin_counts(plugins)
+
+    def validate_per_plugin_counts(self, plugins: list[Path]) -> None:
+        """README のプラグイン表で、各プラグイン行のスキル数カラムが実体と一致するか検査する。
+
+        `| [lab-foo](./lab-foo/) | 責務 | 7 | /cmd |` のような行を対象に、その行の bare
+        整数セルに実体のスキル数が含まれるかを確認する（automation 6→7 のようなドリフト検出）。
+        コードフェンス内は無視する。
+        """
+        actual = {p.name: len(find_skill_dirs(p)) for p in plugins}
+        for fname in README_FILES:
+            md = self.root / fname
+            if not md.exists():
+                continue
+            content = read_text(md)
+            if content is None:
+                continue
+            content = FENCE_RE.sub("", normalize_newlines(content))
+            for line in content.splitlines():
+                if not line.lstrip().startswith("|"):
+                    continue
+                for pname, count in actual.items():
+                    # 行がこのプラグインを参照しているか（リンク or 素の名前）
+                    if f"./{pname}/" not in line and f"[{pname}]" not in line:
+                        continue
+                    cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                    int_cells = [int(c) for c in cells if TABLE_INT_CELL_RE.match(c)]
+                    if not int_cells:
+                        continue
+                    if count in int_cells:
+                        self.ok(f"{fname}: {pname} スキル数 {count}")
+                    else:
+                        self.err(
+                            f"{fname}: {pname} のスキル数カラム {int_cells} が実体 {count} と不一致"
+                        )
+
+        # 各プラグイン自身の README の「Skills (N)」見出しも検査する
+        for plugin in plugins:
+            count = actual[plugin.name]
+            for fname in ("README.md", "README.en.md"):
+                md = plugin / fname
+                if not md.exists():
+                    continue
+                content = read_text(md)
+                if content is None:
+                    continue
+                content = FENCE_RE.sub("", normalize_newlines(content))
+                for m in PLUGIN_SKILLS_HEADER_RE.finditer(content):
+                    declared = int(m.group(1))
+                    rel = f"{plugin.name}/{fname}"
+                    if declared == count:
+                        self.ok(f"{rel}: Skills ({count})")
+                    else:
+                        self.err(
+                            f"{rel}: 見出し 'Skills ({declared})' が実体 {count} と不一致"
+                        )
 
     def run(self) -> bool:
         if not self.root.is_dir():
@@ -452,6 +639,7 @@ class Validator:
 
         self.validate_skill_refs(plugins)
         self.validate_manifests(plugins)
+        self.validate_readme_counts(plugins)
 
         # 結果サマリー
         print(f"\n{'=' * 60}", file=self.out)
@@ -481,7 +669,7 @@ class Validator:
         print("\n検証成功: すべてのチェックをパスしました", file=self.out)
         return True
 
-    def summary_dict(self, success: bool) -> dict:
+    def summary_dict(self, success: bool) -> dict[str, Any]:
         return {
             "success": success,
             "ok": self.ok_count,

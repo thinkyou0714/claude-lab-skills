@@ -9,13 +9,15 @@ Frames "who can access what under which conditions, and can it be traced and rec
 
 - [`/data-review`](./.claude/commands/data-review.md) — applies skills from `data-model-review` to `rollback-readiness` as needed
 
-## Skills (6)
+## Skills (8)
 
 | Skill | Responsibility |
 |---|---|
 | [`data-model-review`](./skills/data-model-review/SKILL.md) | Review schema for normalization / integrity / extensibility / permission boundaries |
+| [`auth-system-design`](./skills/auth-system-design/SKILL.md) | Design the authn/identity system (methods, sessions, verification, recovery) |
 | [`auth-boundary-check`](./skills/auth-boundary-check/SKILL.md) | Check authn/authz boundaries for gaps and over-grants |
 | [`access-control-matrix`](./skills/access-control-matrix/SKILL.md) | Design role × resource × operation access control as a matrix |
+| [`secret-management-review`](./skills/secret-management-review/SKILL.md) | Review secrets/keys for storage, scope, rotation, and leak prevention |
 | [`pii-handling-review`](./skills/pii-handling-review/SKILL.md) | Review PII collection-to-deletion against minimization and protection |
 | [`audit-log-design`](./skills/audit-log-design/SKILL.md) | Design audit logs that trace who did what, when |
 | [`rollback-readiness`](./skills/rollback-readiness/SKILL.md) | Confirm data-layer changes can be safely rolled back on failure |

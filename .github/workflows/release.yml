@@ -1,0 +1,47 @@
+name: release
+
+# タグ v* を push すると GitHub Release を作成する。
+# リリース手順とバージョニング方針は RELEASING.md / ADR-010 を参照。
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify manifests are in sync with the tag
+        run: |
+          python3 validate_plugins.py --strict
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # CHANGELOG をリリースノートに使う。無ければ自動生成にフォールバック。
+          if grep -q "^## \[${GITHUB_REF_NAME#v}\]" CHANGELOG.md; then
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "${GITHUB_REF_NAME}" \
+              --notes "See [CHANGELOG.md](./CHANGELOG.md) for details."
+          else
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "${GITHUB_REF_NAME}" \
+              --generate-notes
+          fi

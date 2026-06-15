@@ -9,7 +9,7 @@ Lets you decide "should this be automated?" and "would we notice if it broke?" b
 
 - [`/automation-review`](./.claude/commands/automation-review.md) — applies skills from `automation-feasibility` to `monitoring-alert-design`
 
-## Skills (6)
+## Skills (7)
 
 | Skill | Responsibility |
 |---|---|
@@ -19,6 +19,7 @@ Lets you decide "should this be automated?" and "would we notice if it broke?" b
 | [`failure-point-review`](./skills/failure-point-review/SKILL.md) | Enumerate failure points by impact and detectability |
 | [`retry-idempotency-check`](./skills/retry-idempotency-check/SKILL.md) | Verify retry design and idempotency to prevent double-execution damage |
 | [`monitoring-alert-design`](./skills/monitoring-alert-design/SKILL.md) | Design monitoring items, alert thresholds, recipients, and first response |
+| [`agmsg`](./skills/agmsg/SKILL.md) | Wire Claude Code ↔ Codex via a shared SQLite mailbox to remove human copy-paste between agents (upstream: fujibee/agmsg, MIT) |
 
 ## Install
 

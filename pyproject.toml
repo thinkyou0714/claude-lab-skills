@@ -10,7 +10,7 @@ license = { file = "LICENSE" }
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "ruff>=0.4", "mypy>=1.0", "codespell>=2.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.4", "mypy>=1.0", "codespell>=2.0"]
 
 [tool.ruff]
 line-length = 120
@@ -18,22 +18,39 @@ target-version = "py39"
 extend-exclude = [".git", "__pycache__"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP"]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM", "RUF", "S"]
 ignore = [
     "E501",  # 行長は line-length とフォーマッタに委ねる（日本語コメントで超過しやすい）
+    "RUF001", "RUF002", "RUF003",  # 全角記号（日本語ドキュメント由来）を許容
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# テストは assert / subprocess / tmp パスの使用が正当
+"tests/**" = ["S101", "S603", "S607"]
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src/lab-core/scripts"]
 testpaths = ["tests"]
 addopts = "-q"
 
+[tool.coverage.run]
+source = ["validate_plugins", "src/lab-core/scripts"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["if __name__ == .__main__.:", "raise NotImplementedError"]
+
 [tool.mypy]
 # 解析対象の構文水準（実行時の 3.9 互換は CI の pytest マトリクスで担保）
 python_version = "3.10"
+strict = true
 ignore_missing_imports = true
 files = [
     "validate_plugins.py",
     "src/lab-core/scripts/search.py",
     "src/lab-core/scripts/new_skill.py",
+    "src/lab-core/scripts/export_skill.py",
+    "src/lab-core/scripts/gen_catalog.py",
+    "src/lab-core/scripts/bump_version.py",
 ]

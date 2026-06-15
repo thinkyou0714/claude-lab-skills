@@ -20,18 +20,18 @@ AI への丸投げではなく、**意思決定品質を高める論点整理・
 
 ## 現フェーズ（本リポジトリの収録範囲）
 
-本リポジトリ（公開版）には **思考OSの6プラグイン / 40スキル** を収録しています。
+本リポジトリ（公開版）には **思考OSの6プラグイン / 43スキル** を収録しています。
 
 | Plugin | 責務 | Skill 数 | Command |
 |---|---|---|---|
 | lab-thinking-core | 論点整理・前提検証・意思決定支援 | 8 | `/think` |
 | lab-strategy-design | 目標検証・代替案比較・スコープ設計・戦略査定 | 7 | `/strategy` `/strategy-review` |
-| lab-automation-architecture | 自動化可否判断・フロー設計・障害設計 | 6 | `/automation-review` |
-| lab-data-auth-ops | データ設計・認証境界・PII・監査ログ | 6 | `/data-review` |
+| lab-automation-architecture | 自動化可否判断・フロー設計・障害設計 | 7 | `/automation-review` |
+| lab-data-auth-ops | データ設計・認証/認証基盤・PII・監査ログ・シークレット | 8 | `/data-review` |
 | lab-implementation-flow | 実装ゲート・影響範囲・施工AIへの handoff | 7 | `/impl-gate` |
 | lab-communication-translation | 非エンジニア翻訳・ドキュメント再利用性・知識記録変換 | 6 | `/translate` |
 
-`src/` の領域別 Source of Truth 層（`src/lab-strategy/` 等）は将来整備（現状の SoT は `src/lab-core/` のみ）。
+`src/` の Source of Truth 層は `src/lab-core/`（共通基盤）・`src/lab-strategy/`・`src/lab-data-auth/` を収録済み。残りの領域別 SoT（`src/lab-system-design/` 等）は Roadmap（[architecture.md](./architecture.md) 参照）。
 
 ---
 
