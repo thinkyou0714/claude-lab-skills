@@ -54,14 +54,31 @@ _TEMPLATE_FENCE_RE = re.compile(r"```markdown\n(.*?)\n```", re.DOTALL)
 
 
 def load_template() -> str:
-    """skill-template.md の ```markdown フェンス内の雛形本文を取り出す。"""
+    """skill-template.md の ```markdown フェンス内の雛形本文を取り出す。
+
+    テンプレート破損を早期に検出するため、フェンスの存在・name プレースホルダ・
+    必須セクションの揃いを検証してから返す。
+    """
+    if not TEMPLATE_PATH.exists():
+        raise RuntimeError(f"テンプレートが見つかりません: {TEMPLATE_PATH}")
     text = TEMPLATE_PATH.read_text(encoding="utf-8")
     match = _TEMPLATE_FENCE_RE.search(text)
     if not match:
         raise RuntimeError(
             f"テンプレート本文（```markdown フェンス）が見つかりません: {TEMPLATE_PATH}"
         )
-    return match.group(1).rstrip() + "\n"
+    body = match.group(1).rstrip() + "\n"
+    if not _NAME_PLACEHOLDER_RE.search(body):
+        raise RuntimeError(
+            f"テンプレートに name プレースホルダ（name: <skill-name>）がありません: {TEMPLATE_PATH}"
+        )
+    headings = {m.group(1).strip() for m in re.finditer(r"^## (.+)$", body, re.MULTILINE)}
+    missing = [s for s in REQUIRED_SECTIONS if s not in headings]
+    if missing:
+        raise RuntimeError(
+            f"テンプレートに必須セクションが不足しています {missing}: {TEMPLATE_PATH}"
+        )
+    return body
 
 
 def build_skill(name: str) -> str:

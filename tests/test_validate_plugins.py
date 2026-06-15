@@ -205,7 +205,15 @@ def _write_manifests(root: Path, plugin: str, plugin_name: str, list_in_market: 
     )
     pj_dir = root / plugin / ".claude-plugin"
     pj_dir.mkdir(parents=True, exist_ok=True)
-    (pj_dir / "plugin.json").write_text(json.dumps({"name": plugin_name}), encoding="utf-8")
+    (pj_dir / "plugin.json").write_text(
+        json.dumps({
+            "name": plugin_name,
+            "version": "1.0.0",
+            "description": "テスト用プラグイン",
+            "keywords": ["test"],
+        }),
+        encoding="utf-8",
+    )
 
 
 def test_manifest_valid(tmp_path):
@@ -390,3 +398,70 @@ def test_readme_count_ignores_code_fence(tmp_path):
     _write_readme(tmp_path, "# t\n\n```text\n6 プラグイン / 40 スキル\n```\n")
     v = run_validator(tmp_path)
     assert not any("カウント" in e for e in v.errors)
+
+
+# --- セクション順序・空本文・plugin.json・プラグイン別カウント -----------------
+
+def test_section_order_enforced(tmp_path):
+    # 必須セクションの順序が崩れているとエラー
+    reordered = list(vp.REQUIRED_SECTIONS)
+    reordered[0], reordered[1] = reordered[1], reordered[0]  # Purpose と Use When を入れ替え
+    make_plugin(tmp_path, skills={"foo": make_skill_md("foo", sections=reordered)})
+    v = run_validator(tmp_path)
+    assert any("順序" in e for e in v.errors)
+
+
+def test_section_order_ok_in_canonical(tmp_path):
+    make_plugin(tmp_path, skills={"foo": make_skill_md("foo")})
+    v = run_validator(tmp_path)
+    assert not any("順序" in e for e in v.errors)
+
+
+def test_empty_section_body_flagged(tmp_path):
+    fm = '---\nname: foo\ndescription: "責務の説明。使う場面を含む。"\n---\n\n'
+    # Purpose を空本文にする
+    parts = []
+    for s in vp.REQUIRED_SECTIONS:
+        body = "" if s == "Purpose" else "本文"
+        parts.append(f"## {s}\n\n{body}\n")
+    make_plugin(tmp_path, skills={"foo": fm + "\n".join(parts)})
+    v = run_validator(tmp_path)
+    assert any("本文が空" in e and "Purpose" in e for e in v.errors)
+
+
+def test_plugin_json_requires_semver(tmp_path):
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_manifests(tmp_path, "lab-x", "lab-x")
+    # version を壊す
+    pj = tmp_path / "lab-x" / ".claude-plugin" / "plugin.json"
+    import json as _json
+    data = _json.loads(pj.read_text(encoding="utf-8"))
+    data["version"] = "v1"
+    pj.write_text(_json.dumps(data), encoding="utf-8")
+    v = run_validator(tmp_path)
+    assert any("SemVer" in e for e in v.errors)
+
+
+def test_per_plugin_count_drift_flagged(tmp_path):
+    # README のプラグイン表のスキル数が実体（1）と乖離（9）するとエラー
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(
+        tmp_path,
+        "# t\n\n1 プラグイン / 1 スキル\n\n"
+        "| Plugin | 責務 | Skill | Cmd |\n|---|---|---|---|\n"
+        "| [lab-x](./lab-x/) | r | 9 | `/x` |\n",
+    )
+    v = run_validator(tmp_path)
+    assert any("lab-x" in e and "不一致" in e for e in v.errors)
+
+
+def test_per_plugin_count_ok(tmp_path):
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    _write_readme(
+        tmp_path,
+        "# t\n\n1 プラグイン / 1 スキル\n\n"
+        "| Plugin | 責務 | Skill | Cmd |\n|---|---|---|---|\n"
+        "| [lab-x](./lab-x/) | r | 1 | `/x` |\n",
+    )
+    v = run_validator(tmp_path)
+    assert not any("lab-x" in e and "不一致" in e for e in v.errors)

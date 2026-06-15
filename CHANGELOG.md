@@ -25,7 +25,11 @@
 
 ### Added（追加）
 
-- **mypy 型チェック**を CI ゲートに追加（`[tool.mypy]`、Python 3.9 基準、3スクリプト対象。`make typecheck` でも実行可）。
+- **移植機構 `export_skill.py` を実装（ADR-008）**: SKILL.md を可搬フォーマット（`prompt` / Cursor `.mdc` / `chatgpt`）へ書き出すスクリプトと手順書 [docs/PORTING.md](./docs/PORTING.md) を追加。ADR-003 の「他ツール移植前提」を主張から動く機構へ前進させた。frontmatter を外し各ツールの薄い容れ物へ詰め替えるのみで、判断本文は改変しない。`tests/test_export_skill.py` を追加。
+- **検証器の堅牢化**: 必須セクションの **順序**（テンプレートの「順序を変えない」）と **空本文** を検査。`plugin.json` の **version（SemVer）/ description** を検証し keywords 欠落を警告。README の **プラグイン別スキル数カラム** を実体と突き合わせ（automation 6→7 のような表内ドリフトを検出）。`new_skill.load_template` を破損テンプレート（フェンス欠落・name プレースホルダ欠落・必須セクション不足・ファイル不在）に対し早期失敗させた。
+- **GitHub Actions ハードニング**: 全ワークフローに per-job `permissions`・`timeout-minutes`・checkout の `persist-credentials: false` を付与し、`actions/checkout` を SHA ピン（actionlint と統一）。PR トリガーに `types: [opened, synchronize, reopened]` を明示。
+- **ADR 索引**を `docs/DECISIONS.md` 冒頭に追加（分類・状態・相互参照）。
+- **mypy 型チェック**を CI ゲートに追加（`[tool.mypy]`、Python 3.9 基準、4スクリプト対象。`make typecheck` でも実行可）。
 - **Roadmap プラグインを本実装**: `lab-strategy-design`（7スキル, `/strategy` `/strategy-review`）と `lab-data-auth-ops`（6スキル, `/data-review`）を追加。収録は 4→6 プラグイン / 27→40 スキルに拡大。既存の forward-reference（`scope-design` / `auth-boundary-check` / `rollback-readiness`）を実体化し、Roadmap 明記を解除。
 - **国際化（i18n）**: 英語版 README（ルート + 全6プラグインの `README.en.md`）と `CONTRIBUTING.en.md` を追加し、日本語版と相互リンク。
 - **スキャフォルダ `src/lab-core/scripts/new_skill.py`**: テンプレートから新規スキルの雛形を生成（既存は上書きしない）。SKILL.md は手作りを正とし機械的な全文再生成はしない方針を **ADR-006** に記録。「SoT → SKILL」ループを安全な形（雛形生成 + 双方向リンク整合の検証）で実現。
@@ -44,6 +48,9 @@
 
 ### Changed（変更）
 
+- **CONTRIBUTING のテンプレート重複を解消（ADR-007 徹底）**: `CONTRIBUTING.md` に埋め込まれていた3つ目のテンプレート複製（LAB Cross-Check が箇条書きで正本の表形式と乖離）を撤去し、正本 `skill-template.md` と `new_skill.py` への参照＋必須セクション表に置換。
+- **3層/4層モデルの補足を README（日英）にも反映**。`docs/architecture.md` の `.cursor/rules/` は例示であり実体は持たない旨を明示し、移植の実機構（PORTING.md / export_skill.py）へ誘導。
+- `lab-automation-architecture/README.en.md` を 7 スキルへ更新（`agmsg` 行を追加）。
 - **雛形テンプレートを単一正本化（重複解消）**: `src/lab-core/templates/skill-template.md` と `new_skill.py` に分裂していた雛形を、`skill-template.md` の ```markdown フェンス1か所に集約。`new_skill.py` はそれを読み取り frontmatter の `name` のみ差し替える（全文再生成はしない / ADR-006 踏襲）。判断は **ADR-007** に記録。
 - `.gitignore` を LF 化し、`.pytest_cache` / `.ruff_cache` / `node_modules` 等を追加。
 - **スキル description の発見性最適化**: トリガー句（「〜のとき/前に使う」）が無かった 14 スキルの `description` に簡潔な利用トリガーを追記し、AI のスキル自動選択での発見性を改善（意味は不変）。

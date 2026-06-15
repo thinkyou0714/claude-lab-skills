@@ -25,6 +25,10 @@ Plugin      --- Domain package (e.g. lab-thinking-core)
        └─ Command --- Thin, tool-specific entry point (Claude Code / Cursor)
 ```
 
+> Note: [docs/architecture.md](./docs/architecture.md) describes the same hierarchy as 3 layers
+> (SoT / adapter / tool entry point). It is the same structure at a different granularity
+> (the 4-layer Plugin + Skill map to the 3-layer "adapter" layer).
+
 ### Principles
 
 - **Source of Truth lives in `src/`**: tool-specific folders (`.claude/`, `.cursor/`) are not the truth.
@@ -78,6 +82,7 @@ run on CI across Python 3.9–3.14. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## Related docs
 
 - [docs/architecture.md](./docs/architecture.md) — design philosophy
+- [docs/PORTING.md](./docs/PORTING.md) — port a skill to other tools (Cursor / ChatGPT / Codex)
 - [docs/DECISIONS.md](./docs/DECISIONS.md) — architecture decision records
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — how to add skills
 - [CHANGELOG.md](./CHANGELOG.md)

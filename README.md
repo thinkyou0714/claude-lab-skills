@@ -24,6 +24,9 @@ Plugin      ─── 領域別パッケージ（例: lab-thinking-core）
        └─ Command ─ AI固有の薄い入口（Claude Code / Cursor 等向け）
 ```
 
+> 補足: [docs/architecture.md](./docs/architecture.md) は同じ階層を 3層（SoT / アダプター / ツール入口）で説明します。
+> 粒度が違うだけで同一構造です（4層の Plugin + Skill が 3層の「アダプター層」に対応）。
+
 ### 原則
 
 - **正本は src/**: AI固有フォルダ（`.claude/`, `.cursor/`）を真実源にしない
@@ -177,6 +180,7 @@ python src/lab-core/scripts/search.py "ROI" --path src/lab-core
 ## 関連ドキュメント
 
 - [docs/architecture.md](./docs/architecture.md) — src/ アーキテクチャの設計思想
+- [docs/PORTING.md](./docs/PORTING.md) — Skill を他ツール（Cursor / ChatGPT / Codex）へ移植する手順
 - [docs/CONTEXT.md](./docs/CONTEXT.md) — プロジェクト背景・現フェーズ
 - [docs/DECISIONS.md](./docs/DECISIONS.md) — 設計決定記録（ADR）
 - [docs/TASKS.md](./docs/TASKS.md) — タスク状態・完了定義

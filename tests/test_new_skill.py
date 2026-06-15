@@ -39,6 +39,24 @@ def test_template_file_is_single_source(tmp_path):
     assert "<skill-name>" not in vp.parse_frontmatter(new_skill.build_skill("foo-bar")).get("name", "")
 
 
+def test_load_template_rejects_malformed(tmp_path, monkeypatch):
+    # フェンスはあるが必須セクションが欠けたテンプレートは RuntimeError
+    bad = tmp_path / "skill-template.md"
+    bad.write_text("# t\n\n```markdown\n---\nname: <skill-name>\n---\n\n## Purpose\n\nx\n```\n",
+                   encoding="utf-8")
+    monkeypatch.setattr(new_skill, "TEMPLATE_PATH", bad)
+    import pytest
+    with pytest.raises(RuntimeError):
+        new_skill.load_template()
+
+
+def test_load_template_rejects_missing_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(new_skill, "TEMPLATE_PATH", tmp_path / "nope.md")
+    import pytest
+    with pytest.raises(RuntimeError):
+        new_skill.load_template()
+
+
 def test_invalid_name_rejected():
     assert not new_skill.SKILL_NAME_RE.match("Foo_Bar")
     assert not new_skill.SKILL_NAME_RE.match("foo bar")

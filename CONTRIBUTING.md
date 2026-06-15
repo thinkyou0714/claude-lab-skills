@@ -60,75 +60,28 @@ python src/lab-core/scripts/new_skill.py <plugin-name> <skill-name>
 
 ### 3. SKILL.md 作成
 
-以下のテンプレートを使用する。各セクションの削除・省略は禁止。
+テンプレートの**唯一の正本**は [`src/lab-core/templates/skill-template.md`](./src/lab-core/templates/skill-template.md) です（ADR-007）。
+`new_skill.py`（手順 2）はこの正本から雛形を生成するため、通常は別途コピーは不要です。
+各セクションの削除・省略は禁止。記入例は実スキル
+[`lab-thinking-core/skills/issue-framing/SKILL.md`](./lab-thinking-core/skills/issue-framing/SKILL.md) を参照。
 
-```markdown
----
-name: <skill-name>
-description: "<1〜2文で責務を説明。使う場面を含めること>"
----
+必須セクション（この順序を変えない。`validate_plugins.py` が順序・空本文を検査する）:
 
-## Purpose
-この skill の目的（1〜3文）
+| セクション | 役割 |
+|---|---|
+| `## Purpose` | 解決する問題（1〜3文） |
+| `## Use When` | 使う状況・トリガー（箇条書き） |
+| `## Inputs` | 必要な入力。不足は推測せず明示 |
+| `## Output Contract` | 出力の順序（論点 → 根拠 → …（領域別）… → 判断材料） |
+| `## Review Lens` | レビュー観点（目的妥当性 / 範囲 / 中長期リスク / LAB整合 / 非エンジニア理解 / 他LLM移植耐性） |
+| `## Instructions` | 実行手順（箇条書き） |
+| `## Guardrails` | してはいけないこと |
+| `## LAB Cross-Check` | クロスチェック表（観点 / 状態 / 備考。状態は OK / 注意 / NG / 対象外） |
+| `## Handoff Notes` | 施工AIへの引き継ぎ（要件 / 成功・失敗条件 / 範囲 / 影響 / ロールバック / コスト） |
+| `## Further Reading` | 関連スキル・正本（src/）への参照 |
 
-## Use When
-この skill を使う状況（箇条書き）
-
-## Inputs
-必要な入力情報
-不足している場合は推測せず明示すること
-
-## Output Contract
-必ず以下の順で出力すること
-1. 論点
-2. 根拠
-3. リスク
-4. 含意
-5. 改善案
-6. 代替案
-7. 判断材料
-
-## Review Lens
-最低限確認する観点
-- 目的妥当性
-- 範囲の過不足
-- 中長期リスク
-- LAB全体との整合性
-- 非エンジニア理解可能性
-- 他LLM移植耐性
-
-## Instructions
-実行手順（箇条書き）
-
-## Guardrails
-- 推測で仕様を埋めない
-- 実装を勝手に確定しない
-- 選択肢を1つに閉じない
-- コスト比較を省略しない
-- ユーザーの意思決定余地を消さない
-
-## LAB Cross-Check
-以下を OK / 注意 / NG で確認すること
-- 自動化フロー
-- データ / 認証 / ログ
-- 実装 / 運用フロー
-- 非エンジニア理解可能性
-- 会員共有 / 再利用耐性
-- 他LLM移植耐性
-
-## Handoff Notes
-施工AIへ渡す前に必要な情報
-- 要件
-- 成功条件
-- 失敗条件
-- 実行範囲
-- 影響範囲
-- ロールバック方針
-- コスト比較
-
-## Further Reading
-関連ドキュメントや参照先
-```
+> 表現はテンプレート正本に従うこと。テンプレートを変更する場合は
+> `skill-template.md` のみを編集する（CONTRIBUTING・生成スクリプトに本文を複製しない）。
 
 ### 4. README.md の更新
 

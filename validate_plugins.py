@@ -85,6 +85,12 @@ README_COUNT_RES = (
 # カウント検査の対象 README（リポジトリルート直下）
 README_FILES = ("README.md", "README.en.md")
 
+# plugin.json / marketplace の version は SemVer（MAJOR.MINOR.PATCH）を要求する
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+# Markdown テーブル行から「bare 整数」セルを抽出する（スキル数カラムの検出に使う）
+TABLE_INT_CELL_RE = re.compile(r"^\d+$")
+
 
 def normalize_newlines(content: str) -> str:
     """CRLF / CR を LF に正規化する。"""
@@ -119,8 +125,25 @@ def parse_frontmatter(content: str) -> dict:
 
 def extract_sections(content: str) -> set[str]:
     """## セクション見出しを抽出する（コードフェンス内の見出しは無視）。"""
+    return set(extract_section_list(content))
+
+
+def extract_section_list(content: str) -> list[str]:
+    """## セクション見出しを出現順で抽出する（コードフェンス内の見出しは無視）。"""
     content = FENCE_RE.sub("", normalize_newlines(content))
-    return {m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)}
+    return [m.group(1).strip() for m in re.finditer(r"^## (.+)$", content, re.MULTILINE)]
+
+
+def extract_section_bodies(content: str) -> dict[str, str]:
+    """## 見出しごとの本文（次の見出しまで）を返す（コードフェンス内の見出しは無視）。"""
+    content = FENCE_RE.sub("", normalize_newlines(content))
+    bodies: dict[str, str] = {}
+    matches = list(re.finditer(r"^## (.+)$", content, re.MULTILINE))
+    for i, m in enumerate(matches):
+        start = m.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+        bodies[m.group(1).strip()] = content[start:end].strip()
+    return bodies
 
 
 def extract_command_skill_refs(content: str) -> list[str]:
@@ -270,6 +293,29 @@ class Validator:
                 self.err(f"{rel}: 必須セクション '## {required}' がない")
             else:
                 self.ok(f"{rel}: ## {required}")
+
+        # 8b. 必須セクションの順序確認（テンプレートの「順序を変えない」を担保）
+        # 重複を除いた初出順で、必須セクションだけを取り出す
+        seen: set[str] = set()
+        present_order: list[str] = []
+        for s in extract_section_list(content):
+            if s in REQUIRED_SECTIONS and s not in seen:
+                seen.add(s)
+                present_order.append(s)
+        expected_order = [s for s in REQUIRED_SECTIONS if s in present_order]
+        if present_order != expected_order:
+            self.err(
+                f"{rel}: 必須セクションの順序がテンプレートと不一致"
+                f"（期待: {expected_order} / 実際: {present_order}）"
+            )
+        else:
+            self.ok(f"{rel}: セクション順序")
+
+        # 8c. 必須セクションの本文が空でないこと
+        bodies = extract_section_bodies(content)
+        for required in REQUIRED_SECTIONS:
+            if required in bodies and not bodies[required]:
+                self.err(f"{rel}: 必須セクション '## {required}' の本文が空")
 
     def validate_command(self, command_file: Path) -> None:
         content = read_text(command_file)
@@ -436,6 +482,28 @@ class Validator:
                         )
                     else:
                         self.ok(f"{self.rel(pj)}: name 一致")
+
+                    # version: SemVer（MAJOR.MINOR.PATCH）を要求する
+                    version = data.get("version")
+                    if not version:
+                        self.err(f"{self.rel(pj)}: version がない")
+                    elif not SEMVER_RE.match(str(version)):
+                        self.err(f"{self.rel(pj)}: version '{version}' が SemVer ではない")
+                    else:
+                        self.ok(f"{self.rel(pj)}: version {version}")
+
+                    # description: 非空・長すぎないこと
+                    desc = data.get("description")
+                    if not desc:
+                        self.err(f"{self.rel(pj)}: description がない")
+                    elif len(str(desc)) > MAX_DESC_LEN:
+                        self.warn(f"{self.rel(pj)}: description が長い（> {MAX_DESC_LEN} 文字）")
+                    else:
+                        self.ok(f"{self.rel(pj)}: description")
+
+                    # keywords: 推奨（発見性向上）。無ければ警告
+                    if not data.get("keywords"):
+                        self.warn(f"{self.rel(pj)}: keywords がない（発見性のため推奨）")
             if market.exists() and plugin.name not in listed_names:
                 self.err(f"{plugin.name}: marketplace.json の plugins に未登録")
 
@@ -471,6 +539,42 @@ class Validator:
                         self.ok(f"{fname}: カウント '{m.group(0)}'")
             if not found:
                 self.warn(f"{fname}: 「N プラグイン / M スキル」表記が見つからない")
+
+        self.validate_per_plugin_counts(plugins)
+
+    def validate_per_plugin_counts(self, plugins: list[Path]) -> None:
+        """README のプラグイン表で、各プラグイン行のスキル数カラムが実体と一致するか検査する。
+
+        `| [lab-foo](./lab-foo/) | 責務 | 7 | /cmd |` のような行を対象に、その行の bare
+        整数セルに実体のスキル数が含まれるかを確認する（automation 6→7 のようなドリフト検出）。
+        コードフェンス内は無視する。
+        """
+        actual = {p.name: len(find_skill_dirs(p)) for p in plugins}
+        for fname in README_FILES:
+            md = self.root / fname
+            if not md.exists():
+                continue
+            content = read_text(md)
+            if content is None:
+                continue
+            content = FENCE_RE.sub("", normalize_newlines(content))
+            for line in content.splitlines():
+                if not line.lstrip().startswith("|"):
+                    continue
+                for pname, count in actual.items():
+                    # 行がこのプラグインを参照しているか（リンク or 素の名前）
+                    if f"./{pname}/" not in line and f"[{pname}]" not in line:
+                        continue
+                    cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                    int_cells = [int(c) for c in cells if TABLE_INT_CELL_RE.match(c)]
+                    if not int_cells:
+                        continue
+                    if count in int_cells:
+                        self.ok(f"{fname}: {pname} スキル数 {count}")
+                    else:
+                        self.err(
+                            f"{fname}: {pname} のスキル数カラム {int_cells} が実体 {count} と不一致"
+                        )
 
     def run(self) -> bool:
         if not self.root.is_dir():
