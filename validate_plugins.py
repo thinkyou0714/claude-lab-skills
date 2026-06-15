@@ -35,6 +35,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any, TextIO
 
 VERSION = "1.0.0"
 
@@ -61,8 +62,8 @@ SKIP_DIRS = {".git", "__pycache__", ".claude", "src", "node_modules"}
 # リンク検査時にスキップするディレクトリ名（VCS・キャッシュのみ）
 LINK_SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache"}
 
-# skill name の許容形式（kebab-case）と長さ上限
-SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+# skill name の許容形式（kebab-case・先頭は英字）と長さ上限
+SKILL_NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 MAX_NAME_LEN = 64
 MAX_DESC_LEN = 1024
 
@@ -100,7 +101,7 @@ def normalize_newlines(content: str) -> str:
     return content.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def parse_frontmatter(content: str) -> dict:
+def parse_frontmatter(content: str) -> dict[str, str]:
     """--- ... --- ブロックから key: value を抽出する（簡易パーサー）。
 
     - CRLF 耐性あり
@@ -119,10 +120,13 @@ def parse_frontmatter(content: str) -> dict:
             continue
         if ":" in line:
             key, _, value = line.partition(":")
+            key = key.strip()
+            if not key:
+                continue
             value = value.strip()
             if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
                 value = value[1:-1]
-            result[key.strip()] = value
+            result[key] = value
     return result
 
 
@@ -214,8 +218,8 @@ class Validator:
         verbose: bool = False,
         strict: bool = False,
         check_links: bool = True,
-        out=None,
-    ):
+        out: TextIO | None = None,
+    ) -> None:
         self.root = root
         self.verbose = verbose
         self.strict = strict
@@ -433,7 +437,7 @@ class Validator:
                             "（実在しないなら Roadmap/未収録 を明記すること）"
                         )
 
-    def _load_json(self, path: Path):
+    def _load_json(self, path: Path) -> Any:
         try:
             return json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
@@ -665,7 +669,7 @@ class Validator:
         print("\n検証成功: すべてのチェックをパスしました", file=self.out)
         return True
 
-    def summary_dict(self, success: bool) -> dict:
+    def summary_dict(self, success: bool) -> dict[str, Any]:
         return {
             "success": success,
             "ok": self.ok_count,

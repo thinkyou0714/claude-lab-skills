@@ -26,7 +26,9 @@ import argparse
 import json
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 VERSION = "1.0.0"
 
@@ -46,7 +48,7 @@ def normalize_extensions(exts: list[str]) -> list[str]:
     return out
 
 
-def iter_target_files(root: Path):
+def iter_target_files(root: Path) -> Iterator[Path]:
     """検索対象ファイルを列挙する（root がファイルならそれ自身）。"""
     if root.is_file():
         yield root
@@ -73,9 +75,9 @@ def search_files(
     tag: str | None,
     context_lines: int = 2,
     max_results: int | None = None,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """root 以下のファイルをキーワード検索する。"""
-    results: list[dict] = []
+    results: list[dict[str, Any]] = []
     pattern = re.compile(re.escape(keyword), re.IGNORECASE)
 
     for path in iter_target_files(root):
@@ -112,7 +114,7 @@ def search_files(
     return results
 
 
-def print_results(results: list[dict], keyword: str) -> None:
+def print_results(results: list[dict[str, Any]], keyword: str) -> None:
     if not results:
         print(f"[検索結果なし] キーワード: '{keyword}'")
         return

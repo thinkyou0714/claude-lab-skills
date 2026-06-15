@@ -97,7 +97,9 @@ def test_skill_name_valid(name):
     assert vp.SKILL_NAME_RE.match(name)
 
 
-@pytest.mark.parametrize("name", ["Foo", "foo_bar", "foo--bar", "-foo", "foo-", "foo bar", ""])
+@pytest.mark.parametrize(
+    "name", ["Foo", "foo_bar", "foo--bar", "-foo", "foo-", "foo bar", "", "1foo", "123"]
+)
 def test_skill_name_invalid(name):
     assert not vp.SKILL_NAME_RE.match(name)
 
@@ -500,3 +502,9 @@ def test_plugin_version_must_match_marketplace(tmp_path):
     )
     v = run_validator(tmp_path)
     assert any("marketplace.json の '1.2.0' と不一致" in e for e in v.errors)
+
+
+def test_parse_frontmatter_skips_empty_key():
+    fm = vp.parse_frontmatter("---\n: orphan\nname: foo\n---\n")
+    assert fm == {"name": "foo"}
+    assert "" not in fm

@@ -27,7 +27,7 @@ from pathlib import Path
 
 VERSION = "1.0.0"
 
-SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+SKILL_NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
 # 必須セクション（validate_plugins.REQUIRED_SECTIONS と一致させること）
 REQUIRED_SECTIONS = [

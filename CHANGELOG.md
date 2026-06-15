@@ -57,6 +57,7 @@
 
 ### Changed（変更）
 
+- **型・lint・供給網の強化（関連推奨の全実装）**: mypy を `strict = true` 化（6スクリプトに型注釈を補完）。ruff のルールを `C4 / SIM / RUF / S`（セキュリティ）へ拡張（テストには `S101/S603/S607` の per-file ignore）。Renovate に GitHub Actions の **ダイジェスト pin**（`pinDigests`）を設定し、第三者アクションの SHA 固定を自動化。`SKILL_NAME_RE` を先頭英字必須へ厳格化（数字始まりを排除）、frontmatter パーサが空キーを無視するよう堅牢化。
 - **英語ドキュメントの拡充（i18n パリティ）**: `README.en.md` に「How commands work / Why this structure / AI tool roles / What this repo does not contain」を追加。`CONTRIBUTING.en.md` にテンプレート正本の参照・スキル品質チェックリスト・禁止事項を追加。`README.md`（日）にも「含まれないもの」節を追加。
 - **CONTRIBUTING のテンプレート重複を解消（ADR-007 徹底）**: `CONTRIBUTING.md` に埋め込まれていた3つ目のテンプレート複製（LAB Cross-Check が箇条書きで正本の表形式と乖離）を撤去し、正本 `skill-template.md` と `new_skill.py` への参照＋必須セクション表に置換。
 - **3層/4層モデルの補足を README（日英）にも反映**。`docs/architecture.md` の `.cursor/rules/` は例示であり実体は持たない旨を明示し、移植の実機構（PORTING.md / export_skill.py）へ誘導。

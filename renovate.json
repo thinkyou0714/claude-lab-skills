@@ -1,5 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["local>thinkyou0714/.github"],
-  "pre-commit": { "enabled": true }
+  "pre-commit": { "enabled": true },
+  "packageRules": [
+    {
+      "description": "GitHub Actions をコミット SHA にピンして供給網リスクを下げる",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    }
+  ]
 }
