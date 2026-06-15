@@ -4,6 +4,9 @@
 書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に準拠し、
 バージョニングは [Semantic Versioning](https://semver.org/lang/ja/) に従う。
 
+> バージョニング・リリース手順は [RELEASING.md](./RELEASING.md)（方針は ADR-010）を参照。
+> MAJOR=構造の破壊的変更 / MINOR=スキル・プラグイン追加 / PATCH=既存の修正。
+
 ## [Unreleased]
 
 ### Fixed（不具合修正）
@@ -25,6 +28,8 @@
 
 ### Added（追加）
 
+- **新規スキル2件を `lab-data-auth-ops` に追加（6→8スキル / リポジトリ計 41→43）**: `auth-system-design`（認証・アイデンティティの仕組みを上流で設計。既存の reactive な `auth-boundary-check` の proactive 対）と `secret-management-review`（APIキー・トークン・鍵の保管・スコープ・ローテーション・漏洩対策）。いずれも事業固有情報を含まない汎用フレームワーク。
+- **リリース運用を整備（ADR-010）**: 単一バージョン方針（`marketplace.json` を正本に全 `plugin.json` を一致）。版整合を `validate_plugins.py` が検査、一括更新スクリプト `bump_version.py`、タグ `v*` 起点の `release.yml`（GitHub Release 自動生成）、手順書 [RELEASING.md](./RELEASING.md) を追加。
 - **全スキル索引 `docs/SKILLS.md` を自動生成（ADR-009）**: `src/lab-core/scripts/gen_catalog.py` が各 SKILL.md の frontmatter から 41 スキルの一覧を生成。`--check` と `tests/test_gen_catalog.py` で「生成結果＝コミット内容」を CI が保証し、一覧ドリフトを構造的に解消。`make catalog` で再生成。
 - **プラグイン別スキル数の検査を拡張**: 各プラグイン自身の `README.md` / `README.en.md` の「Skills (N)」見出し（半角・全角括弧）を実体と突き合わせ（automation EN の 6→7 のような取りこぼしを自動検出）。
 - **行動規範 `CODE_OF_CONDUCT.md`**（Contributor Covenant v2.1）を追加し CONTRIBUTING（日英）からリンク。

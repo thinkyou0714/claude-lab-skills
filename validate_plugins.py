@@ -445,6 +445,7 @@ class Validator:
         print("\nマニフェスト検査: .claude-plugin/", file=self.out)
 
         listed_names: set[str] = set()
+        market_version: str | None = None
         market = self.root / ".claude-plugin" / "marketplace.json"
         if not market.exists():
             self.warn(".claude-plugin/marketplace.json が存在しない")
@@ -453,6 +454,11 @@ class Validator:
             if isinstance(data, dict):
                 if not data.get("name"):
                     self.err(f"{self.rel(market)}: name がない")
+                mv = data.get("version")
+                if mv and SEMVER_RE.match(str(mv)):
+                    market_version = str(mv)
+                elif mv:
+                    self.err(f"{self.rel(market)}: version '{mv}' が SemVer ではない")
                 owner = data.get("owner")
                 if not isinstance(owner, dict) or not owner.get("name"):
                     self.err(f"{self.rel(market)}: owner.name がない")
@@ -492,6 +498,12 @@ class Validator:
                         self.err(f"{self.rel(pj)}: version がない")
                     elif not SEMVER_RE.match(str(version)):
                         self.err(f"{self.rel(pj)}: version '{version}' が SemVer ではない")
+                    elif market_version is not None and str(version) != market_version:
+                        # 単一バージョン方針（ADR-010）: plugin.json は marketplace.json と一致させる
+                        self.err(
+                            f"{self.rel(pj)}: version '{version}' が "
+                            f"marketplace.json の '{market_version}' と不一致"
+                        )
                     else:
                         self.ok(f"{self.rel(pj)}: version {version}")
 

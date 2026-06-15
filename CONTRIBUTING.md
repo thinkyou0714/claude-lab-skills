@@ -2,6 +2,7 @@
 
 > English: [CONTRIBUTING.en.md](./CONTRIBUTING.en.md)
 > 行動規範: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)（Contributor Covenant v2.1）
+> リリース手順・版方針: [RELEASING.md](./RELEASING.md)
 
 ## 基本姿勢
 

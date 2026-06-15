@@ -37,14 +37,14 @@ Plugin      --- Domain package (e.g. lab-thinking-core)
 - **1 Skill = 1 responsibility**; cross-plugin references are minimized.
 - **Never fill specs by guessing**: when inputs are missing, say so explicitly.
 
-## Plugins (6 plugins / 41 skills)
+## Plugins (6 plugins / 43 skills)
 
 | Plugin | Responsibility | Skills | Command |
 |---|---|---|---|
 | [lab-thinking-core](./lab-thinking-core/) | Issue framing, assumption audit, decision support | 8 | `/think` |
 | [lab-strategy-design](./lab-strategy-design/) | Goal validation, alternatives, scope, value/pricing/differentiation, assessment | 7 | `/strategy` `/strategy-review` |
 | [lab-automation-architecture](./lab-automation-architecture/) | Automation feasibility, flow & failure design | 7 | `/automation-review` |
-| [lab-data-auth-ops](./lab-data-auth-ops/) | Data modeling, auth boundary, PII, audit log, access control | 6 | `/data-review` |
+| [lab-data-auth-ops](./lab-data-auth-ops/) | Data modeling, auth/identity design, auth boundary, secrets, PII, audit log, access control | 8 | `/data-review` |
 | [lab-implementation-flow](./lab-implementation-flow/) | Implementation gate, impact scan, handoff | 7 | `/impl-gate` |
 | [lab-communication-translation](./lab-communication-translation/) | Non-engineer translation, doc reuse, knowledge capture | 6 | `/translate` |
 

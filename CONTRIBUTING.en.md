@@ -2,6 +2,7 @@
 
 > 日本語: [CONTRIBUTING.md](./CONTRIBUTING.md)
 > Code of Conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) (Contributor Covenant v2.1)
+> Releasing & versioning: [RELEASING.md](./RELEASING.md)
 
 ## Stance
 

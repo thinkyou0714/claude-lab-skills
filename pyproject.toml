@@ -46,4 +46,5 @@ files = [
     "src/lab-core/scripts/new_skill.py",
     "src/lab-core/scripts/export_skill.py",
     "src/lab-core/scripts/gen_catalog.py",
+    "src/lab-core/scripts/bump_version.py",
 ]

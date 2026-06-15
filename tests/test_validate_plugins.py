@@ -480,3 +480,23 @@ def test_plugin_readme_skills_header_ok(tmp_path):
     (tmp_path / "lab-x" / "README.md").write_text("# lab-x\n\n## Skills (1)\n", encoding="utf-8")
     v = run_validator(tmp_path)
     assert not any("lab-x/README.md" in e and "不一致" in e for e in v.errors)
+
+
+def test_plugin_version_must_match_marketplace(tmp_path):
+    # marketplace に version があるとき plugin.json の version 不一致はエラー（ADR-010）
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    market_dir = tmp_path / ".claude-plugin"
+    market_dir.mkdir(parents=True)
+    (market_dir / "marketplace.json").write_text(
+        json.dumps({"name": "m", "owner": {"name": "o"}, "version": "1.2.0",
+                    "plugins": [{"name": "lab-x", "source": "./lab-x"}]}),
+        encoding="utf-8",
+    )
+    pj_dir = tmp_path / "lab-x" / ".claude-plugin"
+    pj_dir.mkdir(parents=True)
+    (pj_dir / "plugin.json").write_text(
+        json.dumps({"name": "lab-x", "version": "1.0.0", "description": "d", "keywords": ["t"]}),
+        encoding="utf-8",
+    )
+    v = run_validator(tmp_path)
+    assert any("marketplace.json の '1.2.0' と不一致" in e for e in v.errors)

@@ -88,6 +88,7 @@ description: "認証・認可の境界（誰が・何に・どの条件でアク
 
 ## Further Reading
 
+- `auth-system-design` skill — 点検する認証の仕組みそのものを上流で設計する
 - `risk-scan` skill — 認証・認可を含む広範なリスクスキャン
 - `data-model-review` skill — 行レベル権限を支えるデータ設計
 - `access-control-matrix` skill — 権限マトリクスの体系的な設計
