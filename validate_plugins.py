@@ -91,6 +91,9 @@ SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 # Markdown テーブル行から「bare 整数」セルを抽出する（スキル数カラムの検出に使う）
 TABLE_INT_CELL_RE = re.compile(r"^\d+$")
 
+# プラグイン README の「Skills (N)」/「Skills（N）」見出し（半角・全角括弧の両対応）
+PLUGIN_SKILLS_HEADER_RE = re.compile(r"Skills?\s*[（(](\d+)[）)]")
+
 
 def normalize_newlines(content: str) -> str:
     """CRLF / CR を LF に正規化する。"""
@@ -574,6 +577,27 @@ class Validator:
                     else:
                         self.err(
                             f"{fname}: {pname} のスキル数カラム {int_cells} が実体 {count} と不一致"
+                        )
+
+        # 各プラグイン自身の README の「Skills (N)」見出しも検査する
+        for plugin in plugins:
+            count = actual[plugin.name]
+            for fname in ("README.md", "README.en.md"):
+                md = plugin / fname
+                if not md.exists():
+                    continue
+                content = read_text(md)
+                if content is None:
+                    continue
+                content = FENCE_RE.sub("", normalize_newlines(content))
+                for m in PLUGIN_SKILLS_HEADER_RE.finditer(content):
+                    declared = int(m.group(1))
+                    rel = f"{plugin.name}/{fname}"
+                    if declared == count:
+                        self.ok(f"{rel}: Skills ({count})")
+                    else:
+                        self.err(
+                            f"{rel}: 見出し 'Skills ({declared})' が実体 {count} と不一致"
                         )
 
     def run(self) -> bool:

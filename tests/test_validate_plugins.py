@@ -465,3 +465,18 @@ def test_per_plugin_count_ok(tmp_path):
     )
     v = run_validator(tmp_path)
     assert not any("lab-x" in e and "不一致" in e for e in v.errors)
+
+
+def test_plugin_readme_skills_header_drift(tmp_path):
+    # プラグイン README の「Skills (N)」見出しが実体（1）と乖離（5）するとエラー
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    (tmp_path / "lab-x" / "README.md").write_text("# lab-x\n\n## Skills （5）\n", encoding="utf-8")
+    v = run_validator(tmp_path)
+    assert any("lab-x/README.md" in e and "不一致" in e for e in v.errors)
+
+
+def test_plugin_readme_skills_header_ok(tmp_path):
+    make_plugin(tmp_path, plugin="lab-x", skills={"foo": make_skill_md("foo")})
+    (tmp_path / "lab-x" / "README.md").write_text("# lab-x\n\n## Skills (1)\n", encoding="utf-8")
+    v = run_validator(tmp_path)
+    assert not any("lab-x/README.md" in e and "不一致" in e for e in v.errors)

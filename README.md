@@ -11,6 +11,15 @@
 
 AI への丸投げではなく、**意思決定品質を高める論点整理・レビュー観点・判断材料**を再利用可能な単位（Skill）として蓄積します。
 
+> ここでの「判断材料」とは、人間が選択肢を選ぶために必要な情報です。
+> AI が答えを決めるのではなく、人間が**選べる状態**にすることを目的とします。
+
+### このリポジトリに含まれないもの
+
+- **実装コード**: スキルは判断フレームワークであり、実行可能なコードではありません
+- **事業秘密**: 具体的な顧客セグメント・価格設定・内部組織図は含みません
+- **個別の決定記録**: スキルは「何を決めるか」の型であり、「何を決めたか」の個別記録は含みません（`DECISIONS.md` は設計決定のみ）
+
 ---
 
 ## 全体構造（4層モデル）
@@ -179,6 +188,7 @@ python src/lab-core/scripts/search.py "ROI" --path src/lab-core
 
 ## 関連ドキュメント
 
+- [docs/SKILLS.md](./docs/SKILLS.md) — 全スキル索引（自動生成カタログ）
 - [docs/architecture.md](./docs/architecture.md) — src/ アーキテクチャの設計思想
 - [docs/PORTING.md](./docs/PORTING.md) — Skill を他ツール（Cursor / ChatGPT / Codex）へ移植する手順
 - [docs/CONTEXT.md](./docs/CONTEXT.md) — プロジェクト背景・現フェーズ

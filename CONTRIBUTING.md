@@ -1,6 +1,7 @@
 # CONTRIBUTING — lab-skills への追加・変更ルール
 
 > English: [CONTRIBUTING.en.md](./CONTRIBUTING.en.md)
+> 行動規範: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)（Contributor Covenant v2.1）
 
 ## 基本姿勢
 

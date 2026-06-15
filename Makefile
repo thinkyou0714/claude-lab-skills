@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: help install validate lint fmt test typecheck lint-md fmt-md spell check check-docs all
+.PHONY: help install validate lint fmt test typecheck lint-md fmt-md spell check check-docs catalog cov all
 
 help:
 	@echo "make install   - 開発ツール（pytest, ruff, mypy, codespell）を導入"
@@ -14,9 +14,11 @@ help:
 	@echo "make spell     - codespell"
 	@echo "make check     - validate + lint + typecheck + test（CI と同等）"
 	@echo "make check-docs - lint-md + spell"
+	@echo "make catalog   - docs/SKILLS.md（全スキル索引）を再生成"
+	@echo "make cov       - pytest カバレッジ（term-missing）"
 
 install:
-	$(PYTHON) -m pip install pytest ruff mypy codespell
+	$(PYTHON) -m pip install pytest pytest-cov ruff mypy codespell
 
 validate:
 	$(PYTHON) validate_plugins.py --strict
@@ -45,5 +47,11 @@ typecheck:
 check: validate lint typecheck test
 
 check-docs: lint-md spell
+
+catalog:
+	$(PYTHON) src/lab-core/scripts/gen_catalog.py
+
+cov:
+	$(PYTHON) -m pytest --cov --cov-report=term-missing
 
 all: check check-docs

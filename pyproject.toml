@@ -10,7 +10,7 @@ license = { file = "LICENSE" }
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "ruff>=0.4", "mypy>=1.0", "codespell>=2.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.4", "mypy>=1.0", "codespell>=2.0"]
 
 [tool.ruff]
 line-length = 120
@@ -28,6 +28,14 @@ pythonpath = [".", "src/lab-core/scripts"]
 testpaths = ["tests"]
 addopts = "-q"
 
+[tool.coverage.run]
+source = ["validate_plugins", "src/lab-core/scripts"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["if __name__ == .__main__.:", "raise NotImplementedError"]
+
 [tool.mypy]
 # 解析対象の構文水準（実行時の 3.9 互換は CI の pytest マトリクスで担保）
 python_version = "3.10"
@@ -37,4 +45,5 @@ files = [
     "src/lab-core/scripts/search.py",
     "src/lab-core/scripts/new_skill.py",
     "src/lab-core/scripts/export_skill.py",
+    "src/lab-core/scripts/gen_catalog.py",
 ]

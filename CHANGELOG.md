@@ -25,6 +25,10 @@
 
 ### Added（追加）
 
+- **全スキル索引 `docs/SKILLS.md` を自動生成（ADR-009）**: `src/lab-core/scripts/gen_catalog.py` が各 SKILL.md の frontmatter から 41 スキルの一覧を生成。`--check` と `tests/test_gen_catalog.py` で「生成結果＝コミット内容」を CI が保証し、一覧ドリフトを構造的に解消。`make catalog` で再生成。
+- **プラグイン別スキル数の検査を拡張**: 各プラグイン自身の `README.md` / `README.en.md` の「Skills (N)」見出し（半角・全角括弧）を実体と突き合わせ（automation EN の 6→7 のような取りこぼしを自動検出）。
+- **行動規範 `CODE_OF_CONDUCT.md`**（Contributor Covenant v2.1）を追加し CONTRIBUTING（日英）からリンク。
+- **カバレッジ計測**: `pytest-cov` と `[tool.coverage]` 設定・`make cov` を追加（CI マトリクスには載せず、ローカル/任意実行）。
 - **移植機構 `export_skill.py` を実装（ADR-008）**: SKILL.md を可搬フォーマット（`prompt` / Cursor `.mdc` / `chatgpt`）へ書き出すスクリプトと手順書 [docs/PORTING.md](./docs/PORTING.md) を追加。ADR-003 の「他ツール移植前提」を主張から動く機構へ前進させた。frontmatter を外し各ツールの薄い容れ物へ詰め替えるのみで、判断本文は改変しない。`tests/test_export_skill.py` を追加。
 - **検証器の堅牢化**: 必須セクションの **順序**（テンプレートの「順序を変えない」）と **空本文** を検査。`plugin.json` の **version（SemVer）/ description** を検証し keywords 欠落を警告。README の **プラグイン別スキル数カラム** を実体と突き合わせ（automation 6→7 のような表内ドリフトを検出）。`new_skill.load_template` を破損テンプレート（フェンス欠落・name プレースホルダ欠落・必須セクション不足・ファイル不在）に対し早期失敗させた。
 - **GitHub Actions ハードニング**: 全ワークフローに per-job `permissions`・`timeout-minutes`・checkout の `persist-credentials: false` を付与し、`actions/checkout` を SHA ピン（actionlint と統一）。PR トリガーに `types: [opened, synchronize, reopened]` を明示。
@@ -48,6 +52,7 @@
 
 ### Changed（変更）
 
+- **英語ドキュメントの拡充（i18n パリティ）**: `README.en.md` に「How commands work / Why this structure / AI tool roles / What this repo does not contain」を追加。`CONTRIBUTING.en.md` にテンプレート正本の参照・スキル品質チェックリスト・禁止事項を追加。`README.md`（日）にも「含まれないもの」節を追加。
 - **CONTRIBUTING のテンプレート重複を解消（ADR-007 徹底）**: `CONTRIBUTING.md` に埋め込まれていた3つ目のテンプレート複製（LAB Cross-Check が箇条書きで正本の表形式と乖離）を撤去し、正本 `skill-template.md` と `new_skill.py` への参照＋必須セクション表に置換。
 - **3層/4層モデルの補足を README（日英）にも反映**。`docs/architecture.md` の `.cursor/rules/` は例示であり実体は持たない旨を明示し、移植の実機構（PORTING.md / export_skill.py）へ誘導。
 - `lab-automation-architecture/README.en.md` を 7 スキルへ更新（`agmsg` 行を追加）。

@@ -27,6 +27,10 @@ venv/
 .mypy_cache/
 *.egg-info/
 build/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
 # --- Node（markdownlint を npx 実行する際の作業物）---
 node_modules/
