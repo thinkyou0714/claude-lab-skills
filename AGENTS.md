@@ -10,6 +10,7 @@ THINK YOU LAB 思考OS — 再利用可能な判断資産 (Skill) の公開リ�
 - **Skill 追加規則**: `CONTRIBUTING.md`。命名・frontmatter 規約はそこが正本。
 
 ## Claude Code on the web
+
 A cloud session auto-installs dev tooling (SessionStart hook) and loads this `AGENTS.md` +
 `.claude/skills/`. The skill packs themselves ship via the `.claude-plugin/` marketplace.
 MCP is local-only. See `thinkyou0714/.github` → `docs/claude-code-web-readiness.md`.
