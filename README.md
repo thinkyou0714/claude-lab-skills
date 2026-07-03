@@ -197,3 +197,12 @@ python src/lab-core/scripts/search.py "ROI" --path src/lab-core
 - [docs/TASKS.md](./docs/TASKS.md) — タスク状態・完了定義
 - [src/lab-core/data/glossary.md](./src/lab-core/data/glossary.md) — 用語集
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — Skill 追加ルール・命名規則
+
+## Claude Code で開発する (web / cloud 対応)
+
+このリポジトリは **Claude Code on the web** に対応しています。
+
+- Skill 実行はランタイム依存なし（標準ライブラリのみ）。dev ツールは `.claude/bootstrap.sh`（SessionStart）が `[dev]` extra として自動インストール。
+- クラウドセッションは `AGENTS.md` と `.claude/skills/`（例: `validate-skills`）を自動ロード。Skill pack 本体は `.claude-plugin/` マーケットプレイス経由で配布。
+- MCP は本リポジトリではローカル専用。詳細は
+  [`.github/docs/claude-code-web-readiness.md`](https://github.com/thinkyou0714/.github/blob/main/docs/claude-code-web-readiness.md)。
